@@ -115,7 +115,7 @@ int mg_getEdge(M_Graph G, vertex v, vertex u);
 void mg_show(M_Graph G);
 
 /**
- * @brief Gera um arquivo de saída com informações sobre o grafo.
+ * @brief matrix_graph: Gera um arquivo de saída com informações sobre o grafo.
  * 
  * @details As seguinte informações serão geradas: número de vértices, 
  * número de arestas, grau mínimo, grau máximo, grau médio, e mediana de grau.
@@ -129,7 +129,7 @@ void mg_show(M_Graph G);
 int mg_outputFile(M_Graph G, char *path);
 
 /**
- * @brief Percorre o grafo usando a busca em largura e gera um arquivo de texto com árvore gerada.
+ * @brief matrix_graph: Percorre o grafo usando a busca em largura e gera um arquivo de texto com árvore gerada.
  * 
  * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (0).
  * 
@@ -143,7 +143,7 @@ int mg_outputFile(M_Graph G, char *path);
 int mg_bsf(M_Graph G, vertex v, char *path);
 
 /**
- * @brief Percorre o grafo usando a busca em profundidade e gera um arquivo de texto com árvore gerada.
+ * @brief matrix_graph: Percorre o grafo usando a busca em profundidade e gera um arquivo de texto com árvore gerada.
  * 
  * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (0).
  * 
@@ -157,7 +157,7 @@ int mg_bsf(M_Graph G, vertex v, char *path);
 int mg_dfs(M_Graph G, vertex v, char *path);
 
 /**
- * @brief Calcula a distância entre dois vértices utilizando BFS.
+ * @brief matrix_graph: Calcula a distância entre dois vértices utilizando BFS.
  * 
  * @param G Grafo em questão.
  * @param v Vértice de partida.
@@ -168,7 +168,7 @@ int mg_dfs(M_Graph G, vertex v, char *path);
 int mg_distance(M_Graph G, vertex v, vertex u);
 
 /**
- * @brief Calcula o diâmetro de um grafo.
+ * @brief matrix_graph: Calcula o diâmetro de um grafo.
  * 
  * @details O diâmetro de um grafo é a maior distância entre qualquer par de vértices do grafo,
  * ou seja, o comprimento do maior caminho do grafo.
@@ -179,7 +179,8 @@ int mg_distance(M_Graph G, vertex v, vertex u);
 int mg_diameter(M_Graph G);
 
 /**
- * @brief Imprime informações sobre os componentes conexos de um grafo e lista os vértices pertencentes a cada um.
+ * @brief matrix_graph: Imprime informações sobre os componentes conexos de um grafo e lista os vértices pertencentes 
+ * a cada um.
  * 
  * @details Serão impressos informações do tamanho (em vértices) dos componentes e a lista de vértices
  * pertencentes a cada um dos componentes. A listagem será feita em ordem decrescente (do maior ao menor).
