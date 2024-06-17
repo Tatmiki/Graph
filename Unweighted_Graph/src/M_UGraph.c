@@ -145,12 +145,32 @@ void mg_show(M_Graph G)
     }
 }
 
-void mg_bsf()
+int mg_outputFile(M_Graph G, char *path)
 {
 
 }
 
-void mg_dfs()
+int mg_bsf(M_Graph G, vertex v, char *path)
 {
 
+}
+
+int mg_dfs(M_Graph G, vertex v, char *path)
+{
+
+}
+
+int mg_distance(M_Graph G, vertex v, vertex u)
+{
+
+}
+
+int mg_diameter(M_Graph G)
+{
+
+}
+
+void mg_listConnectedComponents(M_Graph G)
+{
+    
 }
