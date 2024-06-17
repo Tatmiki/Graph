@@ -167,12 +167,32 @@ void lg_show(L_Graph G)
     }
 }
 
-void lg_bsf()
+int lg_outputFile(L_Graph G, char *path)
 {
-    
+
 }
 
-void lg_dfs()
+int lg_bsf(L_Graph G, vertex v, char *path)
+{
+
+}
+
+int lg_dfs(L_Graph G, vertex v, char *path)
+{
+
+}
+
+int lg_distance(L_Graph G, vertex v, vertex u)
+{
+
+}
+
+int lg_diameter(L_Graph G)
+{
+
+}
+
+void lg_listConnectedComponents(L_Graph G)
 {
     
 }

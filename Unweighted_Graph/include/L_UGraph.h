@@ -114,7 +114,79 @@ int lg_getEdge(L_Graph G, vertex v, vertex u);
  */
 void lg_show(L_Graph G);
 
-void lg_bsf();
-void lg_dfs();
+/**
+ * @brief list_graph: Gera um arquivo de saída com informações sobre o grafo.
+ * 
+ * @details As seguinte informações serão geradas: número de vértices, 
+ * número de arestas, grau mínimo, grau máximo, grau médio, e mediana de grau.
+ * 
+ * @param G Grafo em questão.
+ * @param path String indicando o caminho da pasta em que será armazenado o arquivo.
+ * 
+ * @retval ( 1 ) - Arquivo de saída gerado com sucesso;
+ * @retval ( 0 ) - Erro na geração do arquivo de saída.
+ */
+int lg_outputFile(L_Graph G, char *path);
+
+/**
+ * @brief list_graph: Percorre o grafo usando a busca em largura e gera um arquivo de texto com árvore gerada.
+ * 
+ * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (0).
+ * 
+ * @param G Grafo a ser percorrido.
+ * @param v Vértice inicial.
+ * @param path Caminho da pasta em que será armazenado o arquivo.
+ * 
+ * @retval ( 1 ) - Arquivo de saída gerado com sucesso;
+ * @retval ( 0 ) - Erro na geração do arquivo de saída.
+ */
+int lg_bsf(L_Graph G, vertex v, char *path);
+
+/**
+ * @brief list_graph: Percorre o grafo usando a busca em profundidade e gera um arquivo de texto com árvore gerada.
+ * 
+ * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (0).
+ * 
+ * @param G Grafo a ser percorrido.
+ * @param v Vértice inicial.
+ * @param path Caminho da pasta em que será armazenado o arquivo.
+ * 
+ * @retval ( 1 ) - Arquivo de saída gerado com sucesso;
+ * @retval ( 0 ) - Erro na geração do arquivo de saída.
+ */
+int lg_dfs(L_Graph G, vertex v, char *path);
+
+/**
+ * @brief list_graph: Calcula a distância entre dois vértices utilizando BFS.
+ * 
+ * @param G Grafo em questão.
+ * @param v Vértice de partida.
+ * @param u Vértice de destino.
+ * @retval ( int ) - A distância entre os dois vértices.
+ * @retval ( 0 ) - Caso não exista um caminho entre os dois vértices.
+ */
+int lg_distance(L_Graph G, vertex v, vertex u);
+
+/**
+ * @brief list_graph: Calcula o diâmetro de um grafo.
+ * 
+ * @details O diâmetro de um grafo é a maior distância entre qualquer par de vértices do grafo,
+ * ou seja, o comprimento do maior caminho do grafo.
+ * 
+ * @param G Grafo em questão.
+ * @return Retorna o diâmetro do grafo.
+ */
+int lg_diameter(L_Graph G);
+
+/**
+ * @brief list_graph: Imprime informações sobre os componentes conexos de um grafo e lista os vértices pertencentes 
+ * a cada um.
+ * 
+ * @details Serão impressos informações do tamanho (em vértices) dos componentes e a lista de vértices
+ * pertencentes a cada um dos componentes. A listagem será feita em ordem decrescente (do maior ao menor).
+ * 
+ * @param G Grafo em questão.
+ */
+void lg_listConnectedComponents(L_Graph G);
 
 #endif
