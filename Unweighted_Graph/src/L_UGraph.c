@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../include/L_UGraph.h"
+#include <limits.h>
 
 /**
  * @brief Estrura de nó para ligação de vértices da lista de adjacência.
@@ -61,6 +62,43 @@ static void freeList(Node *list, size_t V)
     free(list);
 }
 
+/**
+ * @brief Troca o valor de duas variáveis inteiras
+ * 
+ * @param a Variável a.
+ * @param b Variável b.
+ */
+static void swap(int* a, int* b)
+{
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+/**
+ * @brief Realiza a ordenação rápida de um vetor em ordem crescente.
+ * 
+ * @param vet Vetor em questão.
+ * @param start Início relativo ao índice do vetor (geralmente 0).
+ * @param end  Final realtivo ao índice do vetor (geralmente tamanho-1).
+ */
+static void quicksort(int vet[], const int start, const int end)
+{
+    int left = start, right = end, pivot = vet[(start+end)/2];
+    do
+    {
+        while(vet[left] < pivot) ++left;
+        while(vet[right] > pivot) --right;
+        if(left <= right)
+        {
+            swap(&vet[left], &vet[right]);
+            left++; right--;
+        }
+    }while(left <= right);
+    if(right > start) quicksort(vet, start, right); // ramo esquerdo
+    if(left < end) quicksort(vet, left, end); // ramo direito
+}
+
 L_Graph lg_makeGraphFromFile(char *path)
 {
     FILE *f = fopen(path, "r");
@@ -111,6 +149,7 @@ int lg_insertEdge(L_Graph G, vertex v, vertex u)
         if(head->w == u)
             return 0;
     G->adj[v] = newNode(u, G->adj[v]);
+    G->adj[u] = newNode(v, G->adj[u]);
     G->E++;
     return 1;
 }
@@ -128,6 +167,27 @@ int lg_removeEdge(L_Graph G, vertex v, vertex u)
                 previous->next = current->next;
             else
                 G->adj[v] = current->next;
+            free(current);
+            break;
+        } 
+        previous = current;
+        current = current->next;
+    }
+
+    if(current == NULL)
+        return 0;
+
+    previous = NULL;
+    current = G->adj[u];
+
+    while(current != NULL)
+    {
+        if((current)->w == v)
+        {
+            if(previous != NULL)
+                previous->next = current->next;
+            else
+                G->adj[u] = current->next;
             free(current);
             G->E--;
             return 1;
@@ -173,48 +233,49 @@ int lg_outputFile(L_Graph G, char *path)
     FILE *f = fopen(path, "w");
     if(!f)
         return 0;
-    int vertexDegree[G->V], maxvertexDegree = 0, minvertexDegree = INT_MAX;
-    double mediumvertexDegree = 0, vertexDegreeMedian;
+    int vertexesDegrees[G->V], maxDegree = 0, minDegree = INT_MAX;
+    double mediumDegree = 0, DegreeMedian;
     Node adjacent;
     vertex v;
     for(v; v < G->V; v++)
     {
-        vertexDegree[v] = 0;
+        vertexesDegrees[v] = 0;
         adjacent = G->adj[v];
         while(adjacent != NULL) // Calcula o grau de um vértice
         {
-            vertexDegree[v]++;
+            vertexesDegrees[v]++;
             adjacent = adjacent->next;
         }
-        if(vertexDegree[v] < minvertexDegree)// é o menor grau?
-            minvertexDegree = vertexDegree[v];
-        if(vertexDegree[v] > maxvertexDegree)// é o maior grau?
-            maxvertexDegree = vertexDegree[v];
-        mediumvertexDegree += vertexDegree[v];// soma para média
+        if(vertexesDegrees[v] < minDegree)// é o menor grau?
+            minDegree = vertexesDegrees[v];
+        if(vertexesDegrees[v] > maxDegree)// é o maior grau?
+            maxDegree = vertexesDegrees[v];
+        mediumDegree += vertexesDegrees[v];// soma para média
     }
     //Calcula o grau médio
-    mediumvertexDegree /= G->V;
+    mediumDegree /= G->V;
     //Calcula a mediana
-    quicksort(vertexDegree, 0, G->V-1);
+    quicksort(vertexesDegrees, 0, G->V-1);
     if(G->V % 2 != 0)
-        vertexDegreeMedian = vertexDegree[(G->V / 2) + 1];
+        DegreeMedian = vertexesDegrees[(G->V / 2) + 1];
     else
-        vertexDegreeMedian = (vertexDegree[G->V / 2] + vertexDegree[(G->V / 2) + 1]) / 2.;
+        DegreeMedian = (vertexesDegrees[G->V / 2] + vertexesDegrees[(G->V / 2) + 1]) / 2.;
 
     //Saída para o arquivo
     fprintf(f, "numberOfVertexes=%lu\n", G->V);
     fprintf(f, "numberOfEdges=%lu\n", G->E);
-    fprintf(f, "minvertexDegree=%d\n", minvertexDegree);
-    fprintf(f, "maxvertexDegree=%d\n", maxvertexDegree);
-    fprintf(f, "mediumvertexDegree=%lf\n", mediumvertexDegree);
-    fprintf(f, "vertexDegreeMedian=%lf\n", vertexDegreeMedian);
+    fprintf(f, "minDegree=%d\n", minDegree);
+    fprintf(f, "maxDegree=%d\n", maxDegree);
+    fprintf(f, "mediumDegree=%lf\n", mediumDegree);
+    fprintf(f, "DegreeMedian=%lf\n", DegreeMedian);
 
     fclose(f);
+    return 1;
 }
 
 int lg_bsf(L_Graph G, vertex v, char *path)
 {
-
+    
 }
 
 int lg_dfs(L_Graph G, vertex v, char *path)
