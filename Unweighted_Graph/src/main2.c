@@ -4,5 +4,7 @@
 
 int main()
 {
-    
+    M_Graph G = mg_makeGraphFromFile("./graphs/grafo_1.txt");
+    if(G != NULL)
+        mg_outputFile(G, "./graphs/saida.txt");
 }

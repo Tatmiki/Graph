@@ -27,17 +27,19 @@
  */
 #define vertex unsigned int
 
-
-/*****************************/
-/*   Funções da Biblioteca   */
-/*****************************/
-
 /**
  * @brief Definição da estrutura do grafo com representação em matriz de adjacências.
+ * Os índices de um grafo criado são acessados de 1 a N, sendo N o último vértice do 
+ * grafo.
  * 
  * @note Campos ocultos na implementação.
  */
 typedef struct m_graph *M_Graph;
+
+
+/*****************************/
+/*   Funções da Biblioteca   */
+/*****************************/
 
 /**
  * @brief matrix_graph: Criar a partir de um arquivo texto de adjacências, contendo 
@@ -121,7 +123,7 @@ void mg_show(M_Graph G);
  * número de arestas, grau mínimo, grau máximo, grau médio, e mediana de grau.
  * 
  * @param G Grafo em questão.
- * @param path String indicando o caminho da pasta em que será armazenado o arquivo (ex: "./graphs/output/").
+ * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
  * 
  * @retval ( 1 ) - Arquivo de saída gerado com sucesso;
  * @retval ( 0 ) - Erro na geração do arquivo de saída.
@@ -135,7 +137,7 @@ int mg_outputFile(M_Graph G, char *path);
  * 
  * @param G Grafo a ser percorrido.
  * @param v Vértice inicial.
- * @param path Caminho da pasta em que será armazenado o arquivo (ex: "./graphs/output/").
+ * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
  * 
  * @retval ( 1 ) - Arquivo de saída gerado com sucesso;
  * @retval ( 0 ) - Erro na geração do arquivo de saída.
@@ -149,7 +151,7 @@ int mg_bsf(M_Graph G, vertex v, char *path);
  * 
  * @param G Grafo a ser percorrido.
  * @param v Vértice inicial.
- * @param path Caminho da pasta em que será armazenado o arquivo (ex: "./graphs/output/").
+ * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
  * 
  * @retval ( 1 ) - Arquivo de saída gerado com sucesso;
  * @retval ( 0 ) - Erro na geração do arquivo de saída.
