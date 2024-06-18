@@ -121,7 +121,7 @@ void lg_show(L_Graph G);
  * número de arestas, grau mínimo, grau máximo, grau médio, e mediana de grau.
  * 
  * @param G Grafo em questão.
- * @param path String indicando o caminho da pasta em que será armazenado o arquivo (ex: "./graphs/output/").
+ * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
  * 
  * @retval ( 1 ) - Arquivo de saída gerado com sucesso;
  * @retval ( 0 ) - Erro na geração do arquivo de saída.
@@ -135,8 +135,8 @@ int lg_outputFile(L_Graph G, char *path);
  * 
  * @param G Grafo a ser percorrido.
  * @param v Vértice inicial.
- * @param path Caminho da pasta em que será armazenado o arquivo (ex: "./graphs/output/").
- * 
+ * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
+ *  
  * @retval ( 1 ) - Arquivo de saída gerado com sucesso;
  * @retval ( 0 ) - Erro na geração do arquivo de saída.
  */
@@ -149,8 +149,8 @@ int lg_bsf(L_Graph G, vertex v, char *path);
  * 
  * @param G Grafo a ser percorrido.
  * @param v Vértice inicial.
- * @param path Caminho da pasta em que será armazenado o arquivo (ex: "./graphs/output/").
- * 
+ * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
+ *  
  * @retval ( 1 ) - Arquivo de saída gerado com sucesso;
  * @retval ( 0 ) - Erro na geração do arquivo de saída.
  */
