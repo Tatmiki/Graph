@@ -173,41 +173,41 @@ int lg_outputFile(L_Graph G, char *path)
     FILE *f = fopen(path, "w");
     if(!f)
         return 0;
-    int degree[G->V], maxDegree = 0, minDegree = INT_MAX;
-    double mediumDegree = 0, degreeMedian;
+    int vertexDegree[G->V], maxvertexDegree = 0, minvertexDegree = INT_MAX;
+    double mediumvertexDegree = 0, vertexDegreeMedian;
     Node adjacent;
     vertex v;
     for(v; v < G->V; v++)
     {
-        degree[v] = 0;
+        vertexDegree[v] = 0;
         adjacent = G->adj[v];
         while(adjacent != NULL) // Calcula o grau de um vértice
         {
-            degree[v]++;
+            vertexDegree[v]++;
             adjacent = adjacent->next;
         }
-        if(degree[v] < minDegree)// é o menor grau?
-            minDegree = degree[v];
-        if(degree[v] > maxDegree)// é o maior grau?
-            maxDegree = degree[v];
-        mediumDegree += degree[v];// soma para média
+        if(vertexDegree[v] < minvertexDegree)// é o menor grau?
+            minvertexDegree = vertexDegree[v];
+        if(vertexDegree[v] > maxvertexDegree)// é o maior grau?
+            maxvertexDegree = vertexDegree[v];
+        mediumvertexDegree += vertexDegree[v];// soma para média
     }
     //Calcula o grau médio
-    mediumDegree /= G->V;
+    mediumvertexDegree /= G->V;
     //Calcula a mediana
-    quicksort(degree, 0, G->V-1);
+    quicksort(vertexDegree, 0, G->V-1);
     if(G->V % 2 != 0)
-        degreeMedian = degree[(G->V / 2) + 1];
+        vertexDegreeMedian = vertexDegree[(G->V / 2) + 1];
     else
-        degreeMedian = (degree[G->V / 2] + degree[(G->V / 2) + 1]) / 2.;
+        vertexDegreeMedian = (vertexDegree[G->V / 2] + vertexDegree[(G->V / 2) + 1]) / 2.;
 
     //Saída para o arquivo
     fprintf(f, "numberOfVertexes=%lu\n", G->V);
     fprintf(f, "numberOfEdges=%lu\n", G->E);
-    fprintf(f, "minDegree=%d\n", minDegree);
-    fprintf(f, "maxDegree=%d\n", maxDegree);
-    fprintf(f, "mediumDegree=%lf\n", mediumDegree);
-    fprintf(f, "degreeMedian=%lf\n", degreeMedian);
+    fprintf(f, "minvertexDegree=%d\n", minvertexDegree);
+    fprintf(f, "maxvertexDegree=%d\n", maxvertexDegree);
+    fprintf(f, "mediumvertexDegree=%lf\n", mediumvertexDegree);
+    fprintf(f, "vertexDegreeMedian=%lf\n", vertexDegreeMedian);
 
     fclose(f);
 }
