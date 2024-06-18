@@ -121,7 +121,7 @@ void mg_show(M_Graph G);
  * número de arestas, grau mínimo, grau máximo, grau médio, e mediana de grau.
  * 
  * @param G Grafo em questão.
- * @param path String indicando o caminho da pasta em que será armazenado o arquivo.
+ * @param path String indicando o caminho da pasta em que será armazenado o arquivo (ex: "./graphs/output/").
  * 
  * @retval ( 1 ) - Arquivo de saída gerado com sucesso;
  * @retval ( 0 ) - Erro na geração do arquivo de saída.
@@ -135,7 +135,7 @@ int mg_outputFile(M_Graph G, char *path);
  * 
  * @param G Grafo a ser percorrido.
  * @param v Vértice inicial.
- * @param path Caminho da pasta em que será armazenado o arquivo.
+ * @param path Caminho da pasta em que será armazenado o arquivo (ex: "./graphs/output/").
  * 
  * @retval ( 1 ) - Arquivo de saída gerado com sucesso;
  * @retval ( 0 ) - Erro na geração do arquivo de saída.
@@ -149,7 +149,7 @@ int mg_bsf(M_Graph G, vertex v, char *path);
  * 
  * @param G Grafo a ser percorrido.
  * @param v Vértice inicial.
- * @param path Caminho da pasta em que será armazenado o arquivo.
+ * @param path Caminho da pasta em que será armazenado o arquivo (ex: "./graphs/output/").
  * 
  * @retval ( 1 ) - Arquivo de saída gerado com sucesso;
  * @retval ( 0 ) - Erro na geração do arquivo de saída.
