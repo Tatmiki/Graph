@@ -27,17 +27,19 @@
  */
 #define vertex unsigned int
 
-
-/*****************************/
-/*   Funções da Biblioteca   */
-/*****************************/
-
 /**
  * @brief Definição da estrutura do grafo com representação em matriz de adjacências.
+ * Os índices de um grafo criado são acessados de 1 a N, sendo N o último vértice do 
+ * grafo.
  * 
  * @note Campos ocultos na implementação.
  */
 typedef struct m_graph *M_Graph;
+
+
+/*****************************/
+/*   Funções da Biblioteca   */
+/*****************************/
 
 /**
  * @brief matrix_graph: Criar a partir de um arquivo texto de adjacências, contendo 

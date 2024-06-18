@@ -29,6 +29,8 @@
 
 /**
  * @brief Definição da strutura do grafo com representação em lista de adjacências.
+ * Os índices de um grafo criado são acessados de 1 a N, sendo N o último vértice 
+ * do grafo.
  * 
  * @note Campos ocultos na implementação.
  */
