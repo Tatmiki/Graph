@@ -12,14 +12,15 @@ lib: 	$(BIN)/M_UGraph.o	\
 		$(BIN)/L_UGraph.o
 	ar -rcs $(LIB)/libGraph.a $(BIN)/*.o
 
-main: $(SRC)/main.c
-	gcc $(FLAGS) $< $(BIN)/*.o $(LIB_NAMES) -L $(LIB) -I $(INCLUDE) -o $(APP)/main
+main: $(SRC)/main.c $(SRC)/main2.c
+	gcc $(FLAGS) $(SRC)/main.c $(BIN)/*.o $(LIB_NAMES) -L $(LIB) -I $(INCLUDE) -o $(APP)/main
+	gcc $(FLAGS) $(SRC)/main2.c $(BIN)/*.o $(LIB_NAMES) -L $(LIB) -I $(INCLUDE) -o $(APP)/main2
 
 $(BIN)/%.o: $(SRC)/%.c $(INCLUDE)/%.h
 	gcc $(FLAGS) -c $< -I $(INCLUDE) -o $@
 
 run:
-	./app/main
+	./app/main2
 
 clear:
 	rm $(BIN)/* $(APP)/* $(LIB)/*
