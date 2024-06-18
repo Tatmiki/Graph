@@ -169,7 +169,47 @@ void lg_show(L_Graph G)
 
 int lg_outputFile(L_Graph G, char *path)
 {
+    // Cria/substitui um arquivo texto chamado "saida.txt" no caminho indicado.
+    FILE *f = fopen(path, "w");
+    if(!f)
+        return 0;
+    int degree[G->V], maxDegree = 0, minDegree = INT_MAX;
+    double mediumDegree = 0, degreeMedian;
+    Node adjacent;
+    vertex v;
+    for(v; v < G->V; v++)
+    {
+        degree[v] = 0;
+        adjacent = G->adj[v];
+        while(adjacent != NULL) // Calcula o grau de um vértice
+        {
+            degree[v]++;
+            adjacent = adjacent->next;
+        }
+        if(degree[v] < minDegree)// é o menor grau?
+            minDegree = degree[v];
+        if(degree[v] > maxDegree)// é o maior grau?
+            maxDegree = degree[v];
+        mediumDegree += degree[v];// soma para média
+    }
+    //Calcula o grau médio
+    mediumDegree /= G->V;
+    //Calcula a mediana
+    quicksort(degree, 0, G->V-1);
+    if(G->V % 2 != 0)
+        degreeMedian = degree[(G->V / 2) + 1];
+    else
+        degreeMedian = (degree[G->V / 2] + degree[(G->V / 2) + 1]) / 2.;
 
+    //Saída para o arquivo
+    fprintf(f, "numberOfVertexes=%lu\n", G->V);
+    fprintf(f, "numberOfEdges=%lu\n", G->E);
+    fprintf(f, "minDegree=%d\n", minDegree);
+    fprintf(f, "maxDegree=%d\n", maxDegree);
+    fprintf(f, "mediumDegree=%lf\n", mediumDegree);
+    fprintf(f, "degreeMedian=%lf\n", degreeMedian);
+
+    fclose(f);
 }
 
 int lg_bsf(L_Graph G, vertex v, char *path)
