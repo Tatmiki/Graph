@@ -23,14 +23,6 @@ typedef struct node
 } *Node;
 
 /**
- * @brief Estrutura local de Stack (Pilha) para o algoritmo de DFS.
- */
-typedef struct
-{
-    Node top;
-} *Stack;
-
-/**
  * @brief Estrutura local de Queue (Fila) para o algoritmo de BFS.
  */
 typedef struct
@@ -154,6 +146,22 @@ static Node newNode(vertex w, Node next)
 }
 
 /**
+ * @brief Inicializa uma fila vazia
+ * 
+ * @retval ( queue ) - Fila vazia 
+ * @retval ( NULL ) - Fila não alocada 
+ */
+static Queue initQueue()
+{
+    Queue Q = (Queue)malloc(sizeof(*Q));
+    if(!Q)
+        return NULL;
+    Q->front = NULL;
+    Q->end = NULL;
+    return Q;
+}
+
+/**
  * @brief Enfileira um vértice.
  * 
  * @param Q Fila em questão.
@@ -185,6 +193,25 @@ static vertex q_dequeue(Queue Q)
     vertex v = temp->w;
     free(temp);
     return v;
+}
+
+static void dfs_visit(M_Graph G, vertex u, Vertex_info vertexes[])
+{
+    vertexes[u].color = 'G';
+    vertex v;
+    for(v = 0; v < G->V; v++)
+    {
+        if(G->adj[u][v] == 1)
+        {
+            if(vertexes[v].color == 'W')
+            {
+                vertexes[v].father = u;
+                vertexes[v].depth = vertexes[u].depth + 1;
+                dfs_visit(G, v, vertexes);
+            }
+        }
+    }
+    vertexes[u].color = 'B';
 }
 
 /** FUNÇÕES DA BIBLIOTECA **/
@@ -318,7 +345,7 @@ int mg_outputFile(M_Graph G, char *path)
     return 1;
 }
 
-int mg_bsf(M_Graph G, vertex v, char *path)
+int mg_bfs(M_Graph G, vertex v, char *path)
 {
     v--;
     Vertex_info vertexes[G->V];
@@ -330,9 +357,7 @@ int mg_bsf(M_Graph G, vertex v, char *path)
         vertexes[w].father = -1; // Apesar de father ser unsigned int, +1 ele saíra como 0.
     }
     vertexes[v].color = 'G';
-    Queue Q = (Queue) malloc(sizeof(*Q));
-    Q->front = NULL;
-    Q->end = NULL;
+    Queue Q = initQueue();
     
     // BFS
     q_enqueue(Q, v);
@@ -341,7 +366,7 @@ int mg_bsf(M_Graph G, vertex v, char *path)
         vertex u = q_dequeue(Q);
         for(w = 0; w < G->V; w++)
         {
-            if(G->adj[u][w] != 0)
+            if(G->adj[u][w] == 1)
             {
                 if(vertexes[w].color == 'W')
                 {
@@ -360,7 +385,8 @@ int mg_bsf(M_Graph G, vertex v, char *path)
     FILE *f = fopen(path, "w");
     for(w = 0; w < G->V; w++)
     {
-        fprintf(f, "vertex=%u\tfather=%u\tdepth=%u\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
+        if(vertexes[w].color == 'B') // UM SET SERIA UMA BOA OPÇÃO PARA EVITAR ISSO E DEIXAR A EXIBIÇÃO ORDENADA!!!!!
+            fprintf(f, "vertex=%u\tfather=%u\tdepth=%u\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
     }
     fclose(f);
 }
@@ -368,6 +394,26 @@ int mg_bsf(M_Graph G, vertex v, char *path)
 int mg_dfs(M_Graph G, vertex v, char *path)
 {
     v--;
+    Vertex_info vertexes[G->V];
+    vertex w;
+    for(w = 0; w < G->V; w++)
+    {
+        vertexes[w].color = 'W';
+        vertexes[w].depth = 0;
+        vertexes[w].father = -1;
+    }
+    
+    // DFS
+    dfs_visit(G, v, vertexes);
+    
+    // SAÍDA
+    FILE *f = fopen(path, "w");
+    for(w = 0; w < G->V; w++)
+    {
+        if(vertexes[w].color == 'B') // UM SET SERIA UMA BOA OPÇÃO PARA EVITAR ISSO E DEIXAR A EXIBIÇÃO ORDENADA!!!!!
+            fprintf(f, "vertex=%u\tfather=%u\tdepth=%u\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
+    }
+    fclose(f);
 }
 
 int mg_distance(M_Graph G, vertex v, vertex u)
