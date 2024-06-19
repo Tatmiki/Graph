@@ -22,16 +22,6 @@ struct l_graph
     Node *adj;  /**< Vetor das listas de adjacências.     */
 };
 
-
-
-/**
- * @brief Estrutura local de Stack (Pilha) para o algoritmo de DFS.
- */
-typedef struct
-{
-    Node top;
-} *Stack;
-
 /**
  * @brief Estrutura local de Queue (Fila) para o algoritmo de BFS.
  */
@@ -103,7 +93,6 @@ static void swap(int* a, int* b)
     *a = *b;
     *b = temp;
 }
-
 
 /**
  * @brief Inicializa uma fila vazia
@@ -184,6 +173,26 @@ static void quicksort(int vet[], const int start, const int end)
     }while(left <= right);
     if(right > start) quicksort(vet, start, right); // ramo esquerdo
     if(left < end) quicksort(vet, left, end); // ramo direito
+}
+
+static void visit_Dfs(L_Graph G, vertex v, Vertex_info vertexes[])
+{
+    vertexes[v].color = 'G';  // Marcando o vértice como visitado
+    vertex w;
+
+    Node head = G->adj[v];
+    while (head != NULL)
+    {
+        w = head->w;
+        if (vertexes[w].color == 'W')
+        {
+            vertexes[w].father = v;
+            vertexes[w].depth = vertexes[v].depth + 1;
+            visit_Dfs(G, w, vertexes);
+        }
+        head = head->next;
+    }
+    vertexes[v].color = 'B';  // Finalizando a visita do vértice
 }
 
 L_Graph lg_makeGraphFromFile(char *path)
@@ -408,7 +417,8 @@ int lg_bfs(L_Graph G, vertex v, char *path)
     
     for (w = 0; w < G->V; w++)
     {
-        fprintf(f, "vertex=%u\tfather=%d\tdepth=%d\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
+        if(vertexes[w].color == 'B')
+            fprintf(f, "vertex=%u\tfather=%d\tdepth=%d\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
     }
     fclose(f);
     return 1;
@@ -416,7 +426,34 @@ int lg_bfs(L_Graph G, vertex v, char *path)
 
 int lg_dfs(L_Graph G, vertex v, char *path)
 {
-    v--;
+    v--; // Ajustando o vértice para ser base 0
+    Vertex_info vertexes[G->V];
+    vertex w;
+
+    // Inicializando as estruturas de dados
+    for (w = 0; w < G->V; w++)
+    {
+        vertexes[w].color = 'W';  // Todos os vértices são inicialmente não visitados
+        vertexes[w].depth = 0;
+        vertexes[w].father = -1;  // Inicialmente nenhum vértice tem pai definido
+    }
+
+    // Chamando a DFS para cada vértice não visitado
+    visit_Dfs(G, v, vertexes);
+
+    // Escrevendo a saída no arquivo
+    FILE *f = fopen(path, "w");
+    if (!f)
+        return 0;
+
+    for (w = 0; w < G->V; w++)
+    {
+        if(vertexes[w].color == 'B')
+            fprintf(f, "vertex=%u\tfather=%d\tdepth=%d\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
+    }
+
+    fclose(f);
+    return 1;
 }
 
 int lg_distance(L_Graph G, vertex v, vertex u)
