@@ -377,21 +377,21 @@ int lg_bfs(L_Graph G, vertex v, char *path)
     v--; // Ajusta o vértice para ser base 0
     Vertex_info vertexes[G->V];
     vertex w;
-    
+
     for (w = 0; w < G->V; w++)
     {
         vertexes[w].color = 'W';
         vertexes[w].depth = 0;
         vertexes[w].father = -1;
     }
-    
+
     vertexes[v].color = 'G';
     Queue Q = initQueue();
     enqueue(Q, v);
 
     vertex u;
     Node head;
-    while (Q->front == NULL)
+    while(Q->front != NULL)
     {
         u = dequeue(Q);
         head = G->adj[u]; // Acessa a lista de adjacência do vértice u
@@ -401,6 +401,7 @@ int lg_bfs(L_Graph G, vertex v, char *path)
             w = head->w;
             if (vertexes[w].color == 'W')
             {
+                
                 vertexes[w].color = 'G';
                 vertexes[w].father = u;
                 vertexes[w].depth = vertexes[u].depth + 1;
@@ -411,14 +412,14 @@ int lg_bfs(L_Graph G, vertex v, char *path)
         vertexes[u].color = 'B';
     }
     free(Q);
+
     FILE *f = fopen(path, "w");
     if (!f)
         return 0;
-    
     for (w = 0; w < G->V; w++)
     {
         if(vertexes[w].color == 'B')
-            fprintf(f, "vertex=%u\tfather=%d\tdepth=%d\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
+        fprintf(f, "vertex=%u\tfather=%d\tdepth=%d\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
     }
     fclose(f);
     return 1;
@@ -458,7 +459,52 @@ int lg_dfs(L_Graph G, vertex v, char *path)
 
 int lg_distance(L_Graph G, vertex v, vertex u)
 {
-    v--;u--;
+    v--;u--;  
+    if (v == u) 
+        return 0;
+    Vertex_info vertexes[G->V];
+    vertex w;
+
+    for (w = 0; w < G->V; w++) 
+    {
+        vertexes[w].color = 'W';
+        vertexes[w].depth = 0;
+        vertexes[w].father = -1;
+    }
+
+    vertexes[v].color = 'G';
+    Queue Q = initQueue();
+    enqueue(Q, v);
+
+    Node head;
+    vertex y;
+    while (Q->front != NULL) 
+    {
+        y = dequeue(Q);
+        head = G->adj[y];  
+
+        while (head != NULL) 
+        {
+            w = head->w;
+            if (vertexes[w].color == 'W') 
+            {
+                vertexes[w].color = 'G';
+                vertexes[w].father = y;
+                vertexes[w].depth = vertexes[y].depth + 1;
+                enqueue(Q, w);
+            }
+
+            if (w == u) 
+            {
+                free(Q);
+                return vertexes[w].depth;
+            }
+            head = head->next; 
+        }
+        vertexes[y].color = 'B';
+    }
+    free(Q);
+    return -1;  
 }
 
 int lg_diameter(L_Graph G)

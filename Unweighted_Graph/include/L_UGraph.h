@@ -142,7 +142,7 @@ int lg_outputFile(L_Graph G, char *path);
  * @retval ( 1 ) - Arquivo de saída gerado com sucesso;
  * @retval ( 0 ) - Erro na geração do arquivo de saída.
  */
-int lg_bsf(L_Graph G, vertex v, char *path);
+int lg_bfs(L_Graph G, vertex v, char *path);
 
 /**
  * @brief list_graph: Percorre o grafo usando a busca em profundidade e gera um arquivo de texto com árvore gerada.
