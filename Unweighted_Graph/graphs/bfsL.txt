@@ -1,0 +1,10 @@
+vertex=1	father=4	depth=1
+vertex=2	father=4	depth=1
+vertex=3	father=4	depth=1
+vertex=4	father=0	depth=0
+vertex=5	father=4	depth=1
+vertex=6	father=4	depth=1
+vertex=7	father=4	depth=1
+vertex=8	father=4	depth=1
+vertex=9	father=4	depth=1
+vertex=10	father=4	depth=1
