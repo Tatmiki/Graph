@@ -22,6 +22,35 @@ struct l_graph
     Node *adj;  /**< Vetor das listas de adjacências.     */
 };
 
+
+
+/**
+ * @brief Estrutura local de Stack (Pilha) para o algoritmo de DFS.
+ */
+typedef struct
+{
+    Node top;
+} *Stack;
+
+/**
+ * @brief Estrutura local de Queue (Fila) para o algoritmo de BFS.
+ */
+typedef struct Queue
+{
+    Node front;
+    Node end;
+} *Queue;
+
+/**
+ * @brief Estrutura de apoio para os algoritmos de BFS e DFS.
+ */
+typedef struct
+{
+    char color;
+    vertex father;
+    int depth;
+} Vertex_info;
+
 /**
  * @brief Aloca um novo nodo de vértice.
  * 
@@ -75,6 +104,64 @@ static void swap(int* a, int* b)
     *b = temp;
 }
 
+
+/**
+ * @brief Inicializa uma fila vazia
+ * 
+ * @retval ( queue ) - Fila vazia 
+ * @retval ( NULL ) - Fila não alocada 
+ */
+static Queue initQueue()
+{
+    Queue queue = (Queue)malloc(sizeof(struct Queue));
+    if(!queue)
+        return NULL;
+    queue->front = NULL;
+    queue->end = NULL;
+    return queue;
+}
+
+/**
+ * @brief Adciona um vertex na fila 
+ * 
+ * @retval ( 0 ) - Falha ai criar um novo nó para adicionar na fila
+ * @retval ( NULL ) - Inserção di nó a fila
+ */
+static int enqueue(Queue queue, vertex v)
+{
+    Node new = newNode(v, NULL);
+    if(!new)
+        return 0;
+    if(queue->front == NULL)
+        queue->front = new;
+    else 
+        queue->end->next = new;
+    queue->end = new;
+    return 1;
+}
+
+/**
+ * @brief Retira um vértex da fila
+ * 
+ * @retval ( -1 ) - Fila vazia
+ * @retval ( v ) - Vertex da fila 
+ */
+static vertex dequeue(Queue queue)
+{
+    if(queue->front == NULL)
+        return -1;
+    
+    Node temp = queue->front;
+    vertex v = temp->w;
+    queue->front = queue->front->next;
+
+    if(queue->front == NULL)
+        queue->end == NULL;
+    
+    free(temp);
+    return v;
+}
+
 /**
  * @brief Realiza a ordenação rápida de um vetor em ordem crescente.
  * 
@@ -118,7 +205,7 @@ L_Graph lg_makeGraphFromFile(char *path)
         return 0;
     }
     while(fscanf(f, "%u %u", &v, &u) != EOF)
-        lg_insertEdge(G, v-1, u-1);
+        lg_insertEdge(G, v, u);
     fclose(f);
     return G;
 }
@@ -144,6 +231,7 @@ void lg_destroyGraph(L_Graph *G)
 
 int lg_insertEdge(L_Graph G, vertex v, vertex u)
 {
+    v--; u--;
     Node head;
     for(head = G->adj[v]; head != NULL; head = head->next)
         if(head->w == u)
@@ -156,6 +244,7 @@ int lg_insertEdge(L_Graph G, vertex v, vertex u)
 
 int lg_removeEdge(L_Graph G, vertex v, vertex u)
 {
+    v--;u--;
     Node previous = NULL;
     Node current = G->adj[v];
 
@@ -200,6 +289,7 @@ int lg_removeEdge(L_Graph G, vertex v, vertex u)
 
 int lg_getEdge(L_Graph G,vertex v, vertex u)
 {
+    v--;u--;
     Node prox = G->adj[v];
     while(prox != NULL)
     {
@@ -216,11 +306,11 @@ void lg_show(L_Graph G)
     vertex i;
     for(i = 0; i < G->V; i++)
     {
-        printf("%d: ", i);
+        printf("%d: ", i+1);
         Node adjacent = G->adj[i];
         while(adjacent != NULL)
         {
-            printf(" -> %d", adjacent->w);
+            printf(" -> %d", adjacent->w+1);
             adjacent = adjacent->next;
         }
         printf("\n");
@@ -237,7 +327,7 @@ int lg_outputFile(L_Graph G, char *path)
     double mediumDegree = 0, DegreeMedian;
     Node adjacent;
     vertex v;
-    for(v; v < G->V; v++)
+    for(v = 0; v < G->V; v++)
     {
         vertexesDegrees[v] = 0;
         adjacent = G->adj[v];
@@ -273,19 +363,65 @@ int lg_outputFile(L_Graph G, char *path)
     return 1;
 }
 
-int lg_bsf(L_Graph G, vertex v, char *path)
+int lg_bfs(L_Graph G, vertex v, char *path)
 {
+    v--; // Ajusta o vértice para ser base 0
+    Vertex_info vertexes[G->V];
+    vertex w;
     
+    for (w = 0; w < G->V; w++)
+    {
+        vertexes[w].color = 'W';
+        vertexes[w].depth = 0;
+        vertexes[w].father = -1;
+    }
+    
+    vertexes[v].color = 'G';
+    Queue Q = initQueue();
+    enqueue(Q, v);
+
+    vertex u;
+    Node head;
+    while (Q->front == NULL)
+    {
+        u = dequeue(Q);
+        head = G->adj[u]; // Acessa a lista de adjacência do vértice u
+        
+        while (head != NULL)
+        {
+            w = head->w;
+            if (vertexes[w].color == 'W')
+            {
+                vertexes[w].color = 'G';
+                vertexes[w].father = u;
+                vertexes[w].depth = vertexes[u].depth + 1;
+                enqueue(Q, w);
+            }
+            head = head->next; // Avança para o próximo vizinho na lista de adjacência
+        }
+        vertexes[u].color = 'B';
+    }
+    free(Q);
+    FILE *f = fopen(path, "w");
+    if (!f)
+        return 0;
+    
+    for (w = 0; w < G->V; w++)
+    {
+        fprintf(f, "vertex=%u\tfather=%d\tdepth=%d\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
+    }
+    fclose(f);
+    return 1;
 }
 
 int lg_dfs(L_Graph G, vertex v, char *path)
 {
-
+    v--;
 }
 
 int lg_distance(L_Graph G, vertex v, vertex u)
 {
-
+    v--;u--;
 }
 
 int lg_diameter(L_Graph G)
