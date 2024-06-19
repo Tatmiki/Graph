@@ -142,7 +142,7 @@ int mg_outputFile(M_Graph G, char *path);
  * @retval ( 1 ) - Arquivo de saída gerado com sucesso;
  * @retval ( 0 ) - Erro na geração do arquivo de saída.
  */
-int mg_bsf(M_Graph G, vertex v, char *path);
+int mg_bfs(M_Graph G, vertex v, char *path);
 
 /**
  * @brief matrix_graph: Percorre o grafo usando a busca em profundidade e gera um arquivo de texto com árvore gerada.
