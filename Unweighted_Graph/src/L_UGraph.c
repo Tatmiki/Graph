@@ -22,16 +22,6 @@ struct l_graph
     Node *adj;  /**< Vetor das listas de adjacências.     */
 };
 
-
-
-/**
- * @brief Estrutura local de Stack (Pilha) para o algoritmo de DFS.
- */
-typedef struct
-{
-    Node top;
-} *Stack;
-
 /**
  * @brief Estrutura local de Queue (Fila) para o algoritmo de BFS.
  */
