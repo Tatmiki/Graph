@@ -8,10 +8,46 @@
  */
 struct m_graph
 {
-    size_t V;              /**< Número V de vértices(vertexes). */
-    size_t E;              /**< Número E de arestas(edges). */
-    int **adj;          /**< Matriz de ajacências. */
+    size_t V;   /**< Número V de vértices(vertexes). */
+    size_t E;   /**< Número E de arestas(edges). */
+    int **adj;  /**< Matriz de ajacências. */
 };
+
+/**
+ * @brief Estrutura local de definição de um nó para as estruturas Stack e Queue.
+ */
+typedef struct node
+{
+    vertex w;
+    struct node* next;
+} *Node;
+
+/**
+ * @brief Estrutura local de Stack (Pilha) para o algoritmo de DFS.
+ */
+typedef struct
+{
+    Node top;
+} *Stack;
+
+/**
+ * @brief Estrutura local de Queue (Fila) para o algoritmo de BFS.
+ */
+typedef struct
+{
+    Node front;
+    Node end;
+} *Queue;
+
+/**
+ * @brief Estrutura de apoio para os algoritmos de BFS e DFS.
+ */
+typedef struct
+{
+    char color;             /**< Cor do vértice ('W' - White, 'G' - Gray, 'B' - Black). **/
+    int depth;              /**< Profundidade do vértice na árvore bfs ou dfs. **/
+    vertex father;         /**< Pai do vértice na árvore bfs ou dfs. **/
+} Vertex_info;
 
 /** FUNÇÕES ESTÁTICAS **/
 
@@ -62,7 +98,6 @@ static void freeMatrix(int **matrix, int n)
     free(matrix);
 }
 
-
 /**
  * @brief Troca o valor de duas variáveis inteiras
  * 
@@ -100,6 +135,57 @@ static void quicksort(int vet[], const int start, const int end)
     if(left < end) quicksort(vet, left, end); // ramo direito
 }
 
+/**
+ * @brief Aloca um novo nodo de vértice.
+ * 
+ * @param w Número do vértice
+ * @param next Próximo nó da lista.
+ * @retval ( Node ) - Novo nó alocado
+ * @retval ( NULL ) - Ponteiro nulo indicando erro de alocação.
+ */
+static Node newNode(vertex w, Node next)
+{
+    Node newNode = (Node) malloc(sizeof(struct node));
+    if(newNode == NULL)
+        return NULL;
+    newNode->w = w;
+    newNode->next = next;
+    return newNode;
+}
+
+/**
+ * @brief Enfileira um vértice.
+ * 
+ * @param Q Fila em questão.
+ * @param v Vértice a ser enfileirado.
+ */
+static void q_enqueue(Queue Q, vertex v)
+{
+    Node elem = newNode(v, NULL);
+    if(Q->front == NULL)
+        Q->front = elem;
+    else
+        Q->end->next = elem;
+    Q->end = elem;
+}
+
+/**
+ * @brief Desenfileira um vértice
+ * 
+ * @warning Certifique-se de que a fila não está vazia (Q->front == NULL)
+ * 
+ * @param Q Fila em questão.
+ */
+static vertex q_dequeue(Queue Q)
+{
+    Node temp = Q->front;
+    Q->front = Q->front->next;
+    if(Q->front == NULL)
+        Q->end = NULL;
+    vertex v = temp->w;
+    free(temp);
+    return v;
+}
 
 /** FUNÇÕES DA BIBLIOTECA **/
 
@@ -229,11 +315,54 @@ int mg_outputFile(M_Graph G, char *path)
     fprintf(f, "degreeMedian=%lf\n", degreeMedian);
 
     fclose(f);
+    return 1;
 }
 
 int mg_bsf(M_Graph G, vertex v, char *path)
 {
     v--;
+    Vertex_info vertexes[G->V];
+    vertex w;
+    for(w = 0; w < G->V; w++)
+    {
+        vertexes[w].color = 'W';
+        vertexes[w].depth = 0;
+        vertexes[w].father = -1; // Apesar de father ser unsigned int, +1 ele saíra como 0.
+    }
+    vertexes[v].color = 'G';
+    Queue Q = (Queue) malloc(sizeof(*Q));
+    Q->front = NULL;
+    Q->end = NULL;
+    
+    // BFS
+    q_enqueue(Q, v);
+    while(Q->front != NULL)
+    {
+        vertex u = q_dequeue(Q);
+        for(w = 0; w < G->V; w++)
+        {
+            if(G->adj[u][w] != 0)
+            {
+                if(vertexes[w].color == 'W')
+                {
+                    vertexes[w].color = 'G';
+                    vertexes[w].father = u;
+                    vertexes[w].depth = vertexes[u].depth + 1;
+                    q_enqueue(Q, w);
+                }
+            }
+        }
+        vertexes[u].color = 'B';
+    }
+    free(Q);
+    
+    // SAÍDA
+    FILE *f = fopen(path, "w");
+    for(w = 0; w < G->V; w++)
+    {
+        fprintf(f, "vertex=%u\tfather=%u\tdepth=%u\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
+    }
+    fclose(f);
 }
 
 int mg_dfs(M_Graph G, vertex v, char *path)
