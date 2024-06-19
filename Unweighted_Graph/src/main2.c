@@ -4,7 +4,7 @@
 int main()
 {
     M_Graph G = mg_makeGraphFromFile("./graphs/grafo_1.txt");
-    mg_dfs(G, 279, "./graphs/dfsM.txt");
+    mg_dfs(G, 279, "./graphs/output/dfsM.txt");
     mg_destroyGraph(&G);
 }
 
