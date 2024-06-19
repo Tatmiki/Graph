@@ -163,17 +163,6 @@ static vertex dequeue(Queue queue)
 }
 
 /**
- * @brief Inicializa uma fila vazia
- * 
- * @retval ( 0 ) - Fila não vazia
- * @retval ( 1 ) - Fila vazia
- */
-static int isEmpty(Queue queue)
-{
-    return queue->front == NULL;
-}
-
-/**
  * @brief Realiza a ordenação rápida de um vetor em ordem crescente.
  * 
  * @param vet Vetor em questão.
@@ -338,7 +327,7 @@ int lg_outputFile(L_Graph G, char *path)
     double mediumDegree = 0, DegreeMedian;
     Node adjacent;
     vertex v;
-    for(v; v < G->V; v++)
+    for(v = 0; v < G->V; v++)
     {
         vertexesDegrees[v] = 0;
         adjacent = G->adj[v];
@@ -374,48 +363,55 @@ int lg_outputFile(L_Graph G, char *path)
     return 1;
 }
 
-int lg_bsf(L_Graph G, vertex v, char *path)
+int lg_bfs(L_Graph G, vertex v, char *path)
 {
-    v--;
+    v--; // Ajusta o vértice para ser base 0
     Vertex_info vertexes[G->V];
     vertex w;
-    for(w = 0; w < G->V; w++)
+    
+    for (w = 0; w < G->V; w++)
     {
         vertexes[w].color = 'W';
         vertexes[w].depth = 0;
-        vertexes[w].father = -1;  // Apesar de father ser unsigned int, +1 ele saíra como 0.
+        vertexes[w].father = -1;
     }
     
-    vertexes[v].color = 'G';    
-    Queue queue = initQueue();
-    enqueue(queue, v);
+    vertexes[v].color = 'G';
+    Queue Q = initQueue();
+    enqueue(Q, v);
 
     vertex u;
-    while (queue->front != NULL)
+    Node head;
+    while (Q->front == NULL)
     {
-        u = dequeue(queue);
-        for(w = 0; w < G->V; w++)
+        u = dequeue(Q);
+        head = G->adj[u]; // Acessa a lista de adjacência do vértice u
+        
+        while (head != NULL)
         {
-                if(vertexes[w].color == 'W')
-                {
-                    vertexes[w].color = 'G';
-                    vertexes[w].father = u;
-                    vertexes[w].depth = vertexes[u].depth + 1;
-                    enqueue(queue, w);
-                }
+            w = head->w;
+            if (vertexes[w].color == 'W')
+            {
+                vertexes[w].color = 'G';
+                vertexes[w].father = u;
+                vertexes[w].depth = vertexes[u].depth + 1;
+                enqueue(Q, w);
+            }
+            head = head->next; // Avança para o próximo vizinho na lista de adjacência
         }
         vertexes[u].color = 'B';
     }
-    free(queue);
-    
-    // SAÍDA
+    free(Q);
     FILE *f = fopen(path, "w");
-    for(w = 0; w < G->V; w++)
+    if (!f)
+        return 0;
+    
+    for (w = 0; w < G->V; w++)
     {
-        fprintf(f, "vertex=%u\tfather=%u\tdepth=%u\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
+        fprintf(f, "vertex=%u\tfather=%d\tdepth=%d\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
     }
     fclose(f);
-    return 0;
+    return 1;
 }
 
 int lg_dfs(L_Graph G, vertex v, char *path)
