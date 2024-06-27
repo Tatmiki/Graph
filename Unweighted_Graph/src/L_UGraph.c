@@ -175,6 +175,13 @@ static void quicksort(int vet[], const int start, const int end)
     if(left < end) quicksort(vet, left, end); // ramo direito
 }
 
+/**
+ * @brief Função responsável por visitar os vértices adjacentes a um determinado outro vértice
+ * 
+ * @param G Grafo em que os vérices serão visitados
+ * @param v Vértice a qual seus adjacentes serão visitados
+ * @param vertexes Vetor de vértices pertencentes ao Grafo
+ */
 static void visit_Dfs(L_Graph G, vertex v, Vertex_info vertexes[])
 {
     vertexes[v].color = 'G';  // Marcando o vértice como visitado
@@ -198,11 +205,11 @@ static void visit_Dfs(L_Graph G, vertex v, Vertex_info vertexes[])
 /**
  * @brief Função resonsável retornar o vértixe mais distante de outro determinado vértixe 
  * 
- * @param G Grafo que deseja buscar o vértixe
- * @param v Vértixe de origem
- * @param vertexes Vetor contendo todos os vértixes
+ * @param G Grafo que deseja buscar o vértice
+ * @param v Vértice de origem
+ * @param vertexes Vetor contendo todos os vértices
  * 
- * @retval ( u + 1 ) - Vértice mais distante em relação ao Grafo
+ * @retval ( u ) - Indice do vetor de vértices do vértice mais profundo da árvore BFS.
  */
 static vertex bfs_distancesVertex(L_Graph G, vertex v, Vertex_info vertexes[]) 
 {
@@ -243,7 +250,7 @@ static vertex bfs_distancesVertex(L_Graph G, vertex v, Vertex_info vertexes[])
     }
     
     free(Q);
-    return u + 1;
+    return u;
 }
 
 L_Graph lg_makeGraphFromFile(char *path)
@@ -527,17 +534,27 @@ int lg_distance(L_Graph G, vertex v, vertex u)
     return vertexes[u].depth;  
 }
 
-int lg_diameter(L_Graph G) 
+int lg_vertexEccentricity(L_Graph G, vertex v)
 {
-    int depth;
     Vertex_info vertexes[G->V];
+    vertex w = bfs_distancesVertex(G,v,vertexes);
+    return vertexes[w].depth;
+}
 
-    vertex  v = bfs_distancesVertex(G, 0, vertexes);
-    vertex w = bfs_distancesVertex(G, v, vertexes); 
+int lg_absoluteDiameter(L_Graph G)
+{
+    vertex w;
+    int diameter = 0;
+    for(w = 0; w < G->V; w++)
+    {
+        if(diameter < lg_vertexEccentricity(G,w))
+            diameter = lg_vertexEccentricity(G,w);
+    }
+}
 
-    depth = vertexes[w-1].depth;
-
-    return depth;
+int lg_aprroximateDiameter(L_Graph G)
+{
+    
 }
 
 void lg_listConnectedComponents(L_Graph G)
