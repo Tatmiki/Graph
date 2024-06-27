@@ -1,0 +1,8 @@
+*.rtf linguist-documentation
+*.md linguist-documentation
+*.pdf linguist-documentation
+*.txt linguist-vendored
+Makefile linguist-vendored
+Doxygen linguist-vendored
+*.c linguist-language=C
+
