@@ -175,6 +175,13 @@ static void quicksort(int vet[], const int start, const int end)
     if(left < end) quicksort(vet, left, end); // ramo direito
 }
 
+/**
+ * @brief Função responsável por visitar os vértices adjacentes a um determinado outro vértice
+ * 
+ * @param G Grafo em que os vérices serão visitados
+ * @param v Vértice a qual seus adjacentes serão visitados
+ * @param vertexes Vetor de vértices pertencentes ao Grafo
+ */
 static void visit_Dfs(L_Graph G, vertex v, Vertex_info vertexes[])
 {
     vertexes[v].color = 'G';  // Marcando o vértice como visitado
@@ -193,6 +200,57 @@ static void visit_Dfs(L_Graph G, vertex v, Vertex_info vertexes[])
         head = head->next;
     }
     vertexes[v].color = 'B';  // Finalizando a visita do vértice
+}
+
+/**
+ * @brief Função resonsável retornar o vértixe mais distante de outro determinado vértixe 
+ * 
+ * @param G Grafo que deseja buscar o vértice
+ * @param v Vértice de origem
+ * @param vertexes Vetor contendo todos os vértices
+ * 
+ * @retval ( u ) - Indice do vetor de vértices do vértice mais profundo da árvore BFS.
+ */
+static vertex bfs_distancesVertex(L_Graph G, vertex v, Vertex_info vertexes[]) 
+{
+    vertex w;
+    
+    for (w = 0; w < G->V; w++)
+    {
+        vertexes[w].color = 'W';
+        vertexes[w].depth = 0;
+        vertexes[w].father = -1;
+    }
+
+    vertexes[v].color = 'G';
+    Queue Q = initQueue();
+    enqueue(Q, v);
+
+    vertex u;
+    Node head;
+    while(Q->front != NULL)
+    {
+        u = dequeue(Q);
+        head = G->adj[u]; // Acessa a lista de adjacência do vértice u
+        
+        while (head != NULL)
+        {
+            w = head->w;
+            if (vertexes[w].color == 'W')
+            {
+                
+                vertexes[w].color = 'G';
+                vertexes[w].father = u;
+                vertexes[w].depth = vertexes[u].depth + 1;
+                enqueue(Q, w);
+            }
+            head = head->next; // Avança para o próximo vizinho na lista de adjacência
+        }
+        vertexes[u].color = 'B';
+    }
+    
+    free(Q);
+    return u;
 }
 
 L_Graph lg_makeGraphFromFile(char *path)
@@ -374,47 +432,15 @@ int lg_outputFile(L_Graph G, char *path)
 
 int lg_bfs(L_Graph G, vertex v, char *path)
 {
-    v--; // Ajusta o vértice para ser base 0
+    v--; 
     Vertex_info vertexes[G->V];
-    vertex w;
+    bfs_distancesVertex(G, v, vertexes);
     
-    for (w = 0; w < G->V; w++)
-    {
-        vertexes[w].color = 'W';
-        vertexes[w].depth = 0;
-        vertexes[w].father = -1;
-    }
-    
-    vertexes[v].color = 'G';
-    Queue Q = initQueue();
-    enqueue(Q, v);
-
-    vertex u;
-    Node head;
-    while (Q->front == NULL)
-    {
-        u = dequeue(Q);
-        head = G->adj[u]; // Acessa a lista de adjacência do vértice u
-        
-        while (head != NULL)
-        {
-            w = head->w;
-            if (vertexes[w].color == 'W')
-            {
-                vertexes[w].color = 'G';
-                vertexes[w].father = u;
-                vertexes[w].depth = vertexes[u].depth + 1;
-                enqueue(Q, w);
-            }
-            head = head->next; // Avança para o próximo vizinho na lista de adjacência
-        }
-        vertexes[u].color = 'B';
-    }
-    free(Q);
     FILE *f = fopen(path, "w");
     if (!f)
         return 0;
     
+    vertex w;
     for (w = 0; w < G->V; w++)
     {
         if(vertexes[w].color == 'B')
@@ -458,12 +484,88 @@ int lg_dfs(L_Graph G, vertex v, char *path)
 
 int lg_distance(L_Graph G, vertex v, vertex u)
 {
-    v--;u--;
+    v--;u--;  
+    if (v == u) 
+        return 0;
+    Vertex_info vertexes[G->V];
+    vertex w;
+
+    for (w = 0; w < G->V; w++) 
+    {
+        vertexes[w].color = 'W';
+        vertexes[w].depth = 0;
+        vertexes[w].father = -1;
+    }
+
+    vertexes[v].color = 'G';
+    Queue Q = initQueue();
+    enqueue(Q, v);
+
+    Node head;
+    vertex y;
+    while (Q->front != NULL) 
+    {
+        y = dequeue(Q);
+        head = G->adj[y];  
+
+        while (head != NULL) 
+        {
+            w = head->w;
+            if (vertexes[w].color == 'W') 
+            {
+                vertexes[w].color = 'G';
+                vertexes[w].father = y;
+                vertexes[w].depth = vertexes[y].depth + 1;
+                enqueue(Q, w);
+            }
+
+            if (w == u) 
+                break;
+
+            head = head->next; 
+        }
+        vertexes[y].color = 'B';
+    }
+    while(Q->front != NULL)
+        dequeue(Q);
+    
+    free(Q);
+
+    return vertexes[u].depth;  
 }
 
-int lg_diameter(L_Graph G)
+int lg_vertexEccentricity(L_Graph G, vertex v)
 {
+    Vertex_info vertexes[G->V];
+    vertex w = bfs_distancesVertex(G,v,vertexes);
+    return vertexes[w].depth;
+}
 
+int lg_absoluteDiameter(L_Graph G)
+{
+    vertex w;
+    int diameter = 0;
+    int diameterVerification = lg_vertexEccentricity(G,w);
+    if(diameterVerification == -1)
+        return -1;
+    diameter = diameterVerification;
+    for(w = 1; w < G->V; w++)
+    {
+        diameterVerification = lg_vertexEccentricity(G,w);
+        if(diameter < diameterVerification)
+            diameter = diameterVerification;
+    }
+    return diameter;
+}
+
+int lg_aprroximateDiameter(L_Graph G)
+{
+    Vertex_info vertexes[G->V];
+
+    vertex v = bfs_distancesVertex(G, 0, vertexes);
+    v = bfs_distancesVertex(G, v, vertexes);
+
+    return vertexes[v].depth;
 }
 
 void lg_listConnectedComponents(L_Graph G)

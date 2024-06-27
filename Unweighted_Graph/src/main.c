@@ -4,6 +4,9 @@
 int main()
 {
     L_Graph G = lg_makeGraphFromFile("./graphs/grafo_1.txt");
-    lg_dfs(G, 279, "./graphs/dfsL.txt");
+    
+    lg_bfs(G, 1 ,"./graphs/output/bfsL.txt");
+    lg_dfs(G, 1 ,"./graphs/output/dfsL.txt");
+    printf("%d", lg_diameter(G));
     lg_destroyGraph(&G);
 }
