@@ -195,6 +195,13 @@ static vertex q_dequeue(Queue Q)
     return v;
 }
 
+/**
+ * @brief Realiza busca em profundidade no grafo a partir de um pivo u.
+ * 
+ * @param G Grafo em questão.
+ * @param u Vértice inicial da busca.
+ * @param vertexes Vetor que armazenará os dados da busca.
+ */
 static void dfs_visit(M_Graph G, vertex u, Vertex_info vertexes[])
 {
     vertexes[u].color = 'G';
@@ -212,6 +219,49 @@ static void dfs_visit(M_Graph G, vertex u, Vertex_info vertexes[])
         }
     }
     vertexes[u].color = 'B';
+}
+
+/**
+ * @brief Realiza a busca em largura em um grafo G a partir de um vertice u e preenche
+ * um vetor de Vertex_info com as informações da busca.
+ * 
+ * @param G Grafo em questão.
+ * @param u Vértice incial da busca.
+ * @param vertexes Vetor que armazenará os dados da busca.
+ * @return Retorna a posição relativa ao vetor de vértices do vértice com maior profundidade da árvore BFS.
+ */
+static vertex bfs_distances(M_Graph G, vertex v, Vertex_info vertexes[])
+{
+    vertex w, u = v;
+    for(w = 0; w < G->V; w++)
+    {
+        vertexes[w].color = 'W';
+        vertexes[w].depth = 0;
+        vertexes[w].father = -1;
+    }
+    vertexes[v].color = 'G';
+    Queue Q = initQueue();
+    q_enqueue(Q, v);
+    while(Q->front != NULL)
+    {
+        u = q_dequeue(Q);
+        for(w = 0; w < G->V; w++)
+        {
+            if(G->adj[u][w] == 1)
+            {
+                if(vertexes[w].color == 'W')
+                {
+                    vertexes[w].color = 'G';
+                    vertexes[w].father = u;
+                    vertexes[w].depth = vertexes[u].depth + 1;
+                    q_enqueue(Q, w);
+                }
+            }
+        }
+        vertexes[u].color = 'B';
+    }
+    free(Q);
+    return u; // Índice relativo ao vetor
 }
 
 /** FUNÇÕES DA BIBLIOTECA **/
@@ -349,40 +399,11 @@ int mg_bfs(M_Graph G, vertex v, char *path)
 {
     v--;
     Vertex_info vertexes[G->V];
-    vertex w;
-    for(w = 0; w < G->V; w++)
-    {
-        vertexes[w].color = 'W';
-        vertexes[w].depth = 0;
-        vertexes[w].father = -1; // Apesar de father ser unsigned int, +1 ele saíra como 0.
-    }
-    vertexes[v].color = 'G';
-    Queue Q = initQueue();
-    
-    // BFS
-    q_enqueue(Q, v);
-    while(Q->front != NULL)
-    {
-        vertex u = q_dequeue(Q);
-        for(w = 0; w < G->V; w++)
-        {
-            if(G->adj[u][w] == 1)
-            {
-                if(vertexes[w].color == 'W')
-                {
-                    vertexes[w].color = 'G';
-                    vertexes[w].father = u;
-                    vertexes[w].depth = vertexes[u].depth + 1;
-                    q_enqueue(Q, w);
-                }
-            }
-        }
-        vertexes[u].color = 'B';
-    }
-    free(Q);
+    bfs_distances(G, v, vertexes);
     
     // SAÍDA
     FILE *f = fopen(path, "w");
+    vertex w;
     for(w = 0; w < G->V; w++)
     {
         if(vertexes[w].color == 'B') // UM SET SERIA UMA BOA OPÇÃO PARA EVITAR ISSO E DEIXAR A EXIBIÇÃO ORDENADA!!!!!
@@ -418,12 +439,81 @@ int mg_dfs(M_Graph G, vertex v, char *path)
 
 int mg_distance(M_Graph G, vertex v, vertex u)
 {
+    if(v == u)
+        return 0;
     v--; u--;
+    Vertex_info vertexes[G->V];
+    vertex w;
+    for(w = 0; w < G->V; w++)
+    {
+        vertexes[w].color = 'W';
+        vertexes[w].depth = 0;
+        vertexes[w].father = -1; // Apesar de father ser unsigned int, +1 ele saíra como 0.
+    }
+    vertexes[v].color = 'G';
+    Queue Q = initQueue();
+    
+    // BFS
+    q_enqueue(Q, v);
+    while(Q->front != NULL)
+    {
+        vertex t = q_dequeue(Q);
+        for(w = 0; w < G->V; w++)
+        {
+            if(G->adj[t][w] == 1)
+            {
+                if(vertexes[w].color == 'W')
+                {
+                    vertexes[w].color = 'G';
+                    vertexes[w].father = t;
+                    vertexes[w].depth = vertexes[t].depth + 1;
+                    if(w == u)
+                        break;
+                    q_enqueue(Q, w);
+                }
+            }
+        }
+        vertexes[t].color = 'B';
+    }
+    while(Q->front != NULL)
+        q_dequeue(Q);
+    free(Q);
+    if(w == u)
+        return vertexes[u].depth;
+    else 
+        return -1;
 }
 
-int mg_diameter(M_Graph G)
+int mg_vertexEccentricity(M_Graph G, vertex v)
 {
+    Vertex_info vertexes[G->V];
+    vertex w = bfs_distances(G, v, vertexes);
+    return vertexes[w].depth;
+}
 
+int mg_absoluteDiameter(M_Graph G)
+{
+    vertex w = 0;
+    int diameter, eccentricity;
+    eccentricity = mg_vertexEccentricity(G, w);
+    if(eccentricity == -1)
+        return -1;
+    diameter = eccentricity;
+    for(w = 1; w < G->V; w++)
+    {
+        eccentricity = mg_vertexEccentricity(G, w);
+        if(diameter <= eccentricity)
+            diameter = eccentricity;
+    }
+    return diameter;
+}
+
+int mg_aprroximateDiameter(M_Graph G)
+{
+    Vertex_info vertexes[G->V];
+    vertex farthest = bfs_distances(G, 0, vertexes);
+    farthest = bfs_distances(G, farthest, vertexes);
+    return vertexes[farthest].depth;
 }
 
 void mg_listConnectedComponents(M_Graph G)

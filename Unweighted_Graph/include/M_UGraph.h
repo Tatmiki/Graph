@@ -164,21 +164,47 @@ int mg_dfs(M_Graph G, vertex v, char *path);
  * @param G Grafo em questão.
  * @param v Vértice de partida.
  * @param u Vértice de destino.
- * @retval ( int ) - A distância entre os dois vértices.
- * @retval ( 0 ) - Caso não exista um caminho entre os dois vértices.
+ * @retval ( int ) - Um número inteiro representando distância entre os dois vértices.
+ * @retval ( -1 ) - Caso não exista um caminho entre os dois vértices.
  */
 int mg_distance(M_Graph G, vertex v, vertex u);
 
 /**
- * @brief matrix_graph: Calcula o diâmetro de um grafo.
+ * @brief matrix_graph: A excentricidade de é um vértice v, E(v), é o valor da distância
+ * máxima da distãncia entre v e w, para todo w pertencente ao conjunto dos vértices V
+ * de G(V,E). Essa função calcula a maior distância mínima de v a um vértice w.
  * 
- * @details O diâmetro de um grafo é a maior distância entre qualquer par de vértices do grafo,
- * ou seja, o comprimento do maior caminho do grafo.
+ * @details Base teórica da excentricidade infinita: 
+ *      West, D. B. Introduction to Graph Theory, 2nd ed. Englewood Cliffs, NJ: Prentice-Hall, 2000.
+ *          - pág. 71.
  * 
  * @param G Grafo em questão.
- * @return Retorna o diâmetro do grafo.
+ * @retval ( int ) - Maior distância mínima possíveis de v a w.
+ * @retval ( -1 ) - O grafo é desconexo, logo a excentricidade do vértice é infinita.
  */
-int mg_diameter(M_Graph G);
+int mg_vertexEccentricity(M_Graph G, vertex v);
+
+/**
+ * @brief matrix_graph: O diâmetro de um grafo é a maior distância entre qualquer par de vértices do grafo,
+ * ou seja, o comprimento do maior caminho do grafo. Essa função garante o diâmetro exato de um grafo 
+ * conectado, porém sua complexidade é O(V^3).
+ * 
+ * @param G Grafo em questão.
+ * @retval ( int ) - Diâmetro do grafo.
+ * @retval ( -1 ) - O grafo é desconexo, logo a excentricidade é infinita para todos os vértices, tanto quanto para do diâmetro.
+ */
+int mg_absoluteDiameter(M_Graph G);
+
+/**
+ * @brief matrix_graph: O diâmetro de um grafo é a maior distância entre qualquer par de vértices do grafo,
+ * ou seja, o comprimento do maior caminho do grafo. Essa função retorna o diâmetro aproximado de um grafo 
+ * conectado, porém com uma alta taxa de precisão. Sua complexidade é duas vezes O(V^2).
+ * 
+ * @param G Grafo em questão.
+ * @retval ( int ) - Diãmetro do grafo.
+ * @retval ( -1 ) - O grafo é desconexo, logo a excentricidade é infinita para todos os vértices, tanto quanto para do diâmetro.
+ */
+int mg_aprroximateDiameter(M_Graph G);
 
 /**
  * @brief matrix_graph: Imprime informações sobre os componentes conexos de um grafo e lista os vértices pertencentes 
