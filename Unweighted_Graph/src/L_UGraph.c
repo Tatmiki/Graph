@@ -545,16 +545,27 @@ int lg_absoluteDiameter(L_Graph G)
 {
     vertex w;
     int diameter = 0;
-    for(w = 0; w < G->V; w++)
+    int diameterVerification = lg_vertexEccentricity(G,w);
+    if(diameterVerification == -1)
+        return -1;
+    diameter = diameterVerification;
+    for(w = 1; w < G->V; w++)
     {
-        if(diameter < lg_vertexEccentricity(G,w))
-            diameter = lg_vertexEccentricity(G,w);
+        diameterVerification = lg_vertexEccentricity(G,w);
+        if(diameter < diameterVerification)
+            diameter = diameterVerification;
     }
+    return diameter;
 }
 
 int lg_aprroximateDiameter(L_Graph G)
 {
-    
+    Vertex_info vertexes[G->V];
+
+    vertex v = bfs_distancesVertex(G, 0, vertexes);
+    v = bfs_distancesVertex(G, v, vertexes);
+
+    return vertexes[v].depth;
 }
 
 void lg_listConnectedComponents(L_Graph G)
