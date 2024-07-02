@@ -4,7 +4,8 @@
 int main()
 {
     M_Graph G = mg_makeGraphFromFile("./graphs/grafo_1.txt");
-    printf("%d\n", mg_absoluteDiameter(G));
+    //mg_show(G);
+    printf("%d\n", mg_bfs(G, 1, "./graphs/output/bfsM.txt"));
     mg_destroyGraph(&G);
 }
 
@@ -20,7 +21,7 @@ int main()
 //     mg_insertEdge(G, 5, 6);
 //     mg_show(G);
 //     mg_bfs(G, 2, "./graphs/output/bfsM.txt");
-//     printf("%d\n", mg_diameter(G));
+//     printf("%d\n", mg_absoluteDiameter(G));
 //     mg_destroyGraph(&G);
 // }
 

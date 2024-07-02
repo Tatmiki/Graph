@@ -2,34 +2,18 @@
 #include <stdlib.h>
 #include <limits.h>
 #include "../include/M_UGraph.h"
+#include "../include/List.h"
+#include "../include/Queue.h"
 
 /**
  * @brief Estrutura do grafo com representação em matriz de ajacência.
  */
 struct m_graph
 {
-    size_t V;   /**< Número V de vértices(vertexes). */
-    size_t E;   /**< Número E de arestas(edges). */
+    int V;   /**< Número V de vértices(vertexes). */
+    int E;   /**< Número E de arestas(edges). */
     int **adj;  /**< Matriz de ajacências. */
 };
-
-/**
- * @brief Estrutura local de definição de um nó para as estruturas Stack e Queue.
- */
-typedef struct node
-{
-    vertex w;
-    struct node* next;
-} *Node;
-
-/**
- * @brief Estrutura local de Queue (Fila) para o algoritmo de BFS.
- */
-typedef struct
-{
-    Node front;
-    Node end;
-} *Queue;
 
 /**
  * @brief Estrutura de apoio para os algoritmos de BFS e DFS.
@@ -128,74 +112,6 @@ static void quicksort(int vet[], const int start, const int end)
 }
 
 /**
- * @brief Aloca um novo nodo de vértice.
- * 
- * @param w Número do vértice
- * @param next Próximo nó da lista.
- * @retval ( Node ) - Novo nó alocado
- * @retval ( NULL ) - Ponteiro nulo indicando erro de alocação.
- */
-static Node newNode(vertex w, Node next)
-{
-    Node newNode = (Node) malloc(sizeof(struct node));
-    if(newNode == NULL)
-        return NULL;
-    newNode->w = w;
-    newNode->next = next;
-    return newNode;
-}
-
-/**
- * @brief Inicializa uma fila vazia
- * 
- * @retval ( queue ) - Fila vazia 
- * @retval ( NULL ) - Fila não alocada 
- */
-static Queue initQueue()
-{
-    Queue Q = (Queue)malloc(sizeof(*Q));
-    if(!Q)
-        return NULL;
-    Q->front = NULL;
-    Q->end = NULL;
-    return Q;
-}
-
-/**
- * @brief Enfileira um vértice.
- * 
- * @param Q Fila em questão.
- * @param v Vértice a ser enfileirado.
- */
-static void q_enqueue(Queue Q, vertex v)
-{
-    Node elem = newNode(v, NULL);
-    if(Q->front == NULL)
-        Q->front = elem;
-    else
-        Q->end->next = elem;
-    Q->end = elem;
-}
-
-/**
- * @brief Desenfileira um vértice
- * 
- * @warning Certifique-se de que a fila não está vazia (Q->front == NULL)
- * 
- * @param Q Fila em questão.
- */
-static vertex q_dequeue(Queue Q)
-{
-    Node temp = Q->front;
-    Q->front = Q->front->next;
-    if(Q->front == NULL)
-        Q->end = NULL;
-    vertex v = temp->w;
-    free(temp);
-    return v;
-}
-
-/**
  * @brief Realiza busca em profundidade no grafo a partir de um pivo u.
  * 
  * @param G Grafo em questão.
@@ -240,9 +156,9 @@ static vertex bfs_distances(M_Graph G, vertex v, Vertex_info vertexes[])
         vertexes[w].father = -1;
     }
     vertexes[v].color = 'G';
-    Queue Q = initQueue();
+    Queue Q = q_initQueue();
     q_enqueue(Q, v);
-    while(Q->front != NULL)
+    while(!q_isEmpty(Q))
     {
         u = q_dequeue(Q);
         for(w = 0; w < G->V; w++)
@@ -260,7 +176,7 @@ static vertex bfs_distances(M_Graph G, vertex v, Vertex_info vertexes[])
         }
         vertexes[u].color = 'B';
     }
-    free(Q);
+    q_destroyQueue(&Q);
     return u; // Índice relativo ao vetor
 }
 
@@ -276,15 +192,15 @@ M_Graph mg_makeGraphFromFile(char *path)
     if(!fscanf(f, "%lu", &V))
     {
         fclose(f);
-        return 0;
+        return NULL;
     }
     M_Graph G = mg_makeGraph(V);
     if(G == NULL)
     {
         fclose(f);
-        return NULL;
+        exit(EXIT_FAILURE);
     }
-    while(fscanf(f, "%u %u", &v, &u) != EOF)
+    while(fscanf(f, "%d %d", &v, &u) != EOF)
         mg_insertEdge(G, v, u);
     fclose(f);
     return G;
@@ -384,8 +300,8 @@ int mg_outputFile(M_Graph G, char *path)
         degreeMedian = (vertexesDegrees[G->V / 2] + vertexesDegrees[(G->V / 2) + 1]) / 2.;
     
     // Saída para o arquivo
-    fprintf(f, "numberOfVertexes=%lu\n", G->V);
-    fprintf(f, "numberOfEdges=%lu\n", G->E);
+    fprintf(f, "numberOfVertexes=%d\n", G->V);
+    fprintf(f, "numberOfEdges=%d\n", G->E);
     fprintf(f, "minDegree=%d\n", minDegree);
     fprintf(f, "maxDegree=%d\n", maxDegree);
     fprintf(f, "mediumDegree=%lf\n", mediumDegree);
@@ -403,6 +319,8 @@ int mg_bfs(M_Graph G, vertex v, char *path)
     
     // SAÍDA
     FILE *f = fopen(path, "w");
+    if(f ==  NULL)
+        return 0;
     vertex w;
     for(w = 0; w < G->V; w++)
     {
@@ -410,6 +328,8 @@ int mg_bfs(M_Graph G, vertex v, char *path)
             fprintf(f, "vertex=%u\tfather=%u\tdepth=%u\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
     }
     fclose(f);
+
+    return 1;
 }
 
 int mg_dfs(M_Graph G, vertex v, char *path)
@@ -429,12 +349,15 @@ int mg_dfs(M_Graph G, vertex v, char *path)
     
     // SAÍDA
     FILE *f = fopen(path, "w");
+    if(f == NULL)
+        return 0;
     for(w = 0; w < G->V; w++)
     {
         if(vertexes[w].color == 'B') // UM SET SERIA UMA BOA OPÇÃO PARA EVITAR ISSO E DEIXAR A EXIBIÇÃO ORDENADA!!!!!
             fprintf(f, "vertex=%u\tfather=%u\tdepth=%u\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
     }
     fclose(f);
+    return 1;
 }
 
 int mg_distance(M_Graph G, vertex v, vertex u)
@@ -451,11 +374,11 @@ int mg_distance(M_Graph G, vertex v, vertex u)
         vertexes[w].father = -1; // Apesar de father ser unsigned int, +1 ele saíra como 0.
     }
     vertexes[v].color = 'G';
-    Queue Q = initQueue();
+    Queue Q = q_initQueue();
     
     // BFS
     q_enqueue(Q, v);
-    while(Q->front != NULL)
+    while(!q_isEmpty(Q))
     {
         vertex t = q_dequeue(Q);
         for(w = 0; w < G->V; w++)
@@ -475,9 +398,7 @@ int mg_distance(M_Graph G, vertex v, vertex u)
         }
         vertexes[t].color = 'B';
     }
-    while(Q->front != NULL)
-        q_dequeue(Q);
-    free(Q);
+    q_destroyQueue(&Q);
     if(w == u)
         return vertexes[u].depth;
     else 
@@ -486,6 +407,7 @@ int mg_distance(M_Graph G, vertex v, vertex u)
 
 int mg_vertexEccentricity(M_Graph G, vertex v)
 {
+    v--;
     Vertex_info vertexes[G->V];
     vertex w = bfs_distances(G, v, vertexes);
     return vertexes[w].depth;
@@ -493,16 +415,16 @@ int mg_vertexEccentricity(M_Graph G, vertex v)
 
 int mg_absoluteDiameter(M_Graph G)
 {
-    vertex w = 0;
+    vertex w = 1;
     int diameter, eccentricity;
     eccentricity = mg_vertexEccentricity(G, w);
     if(eccentricity == -1)
         return -1;
     diameter = eccentricity;
-    for(w = 1; w < G->V; w++)
+    for(w = 1; w <= G->V; w++)
     {
         eccentricity = mg_vertexEccentricity(G, w);
-        if(diameter <= eccentricity)
+        if(diameter < eccentricity)
             diameter = eccentricity;
     }
     return diameter;

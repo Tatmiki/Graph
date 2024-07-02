@@ -25,7 +25,7 @@
 /**
  * @brief Definição do índice do vérticie como um valor inteiro não-negativo.
  */
-#define vertex unsigned int
+#define vertex int
 
 /**
  * @brief Definição da estrutura do grafo com representação em matriz de adjacências.
