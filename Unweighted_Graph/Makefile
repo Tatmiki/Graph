@@ -8,8 +8,10 @@ FLAGS = -flto -O3 -Wall -Wextra
 
 all: lib main
 
-lib: 	$(BIN)/M_UGraph.o	\
-		$(BIN)/L_UGraph.o
+lib: 	$(BIN)/List.o 		\
+		$(BIN)/Queue.o		\
+		$(BIN)/M_UGraph.o 	\
+		$(BIN)/L_UGraph.o 	
 	ar -rcs $(LIB)/libGraph.a $(BIN)/*.o
 
 main: $(SRC)/main.c $(SRC)/main2.c

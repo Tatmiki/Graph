@@ -1,35 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../include/L_UGraph.h"
+#include "../include/List.h"
+#include "../include/Queue.h"
 #include <limits.h>
 
-/**
- * @brief Estrura de nó para ligação de vértices da lista de adjacência.
- */
-typedef struct node 
-{
-    vertex w;     /**< Indíce vértice W.                             */
-    struct node* next;  /**< Ponteiro para o próximo vértice da lista.   */
-} *Node;
 
 /**
  * @brief Estrutura do grafo com representação em lista de ajacência.
  */
 struct l_graph 
 {
-    size_t V;   /**< Número V de vértices(vertexes).    */
-    size_t E;   /**< Número E de arestas(edges).        */
-    Node *adj;  /**< Vetor das listas de adjacências.     */
+    int V;   /**< Número V de vértices(vertexes).    */
+    int E;   /**< Número E de arestas(edges).        */
+    List *adj;  /**< Vetor das listas de adjacências.     */
 };
-
-/**
- * @brief Estrutura local de Queue (Fila) para o algoritmo de BFS.
- */
-typedef struct Queue
-{
-    Node front;
-    Node end;
-} *Queue;
 
 /**
  * @brief Estrutura de apoio para os algoritmos de BFS e DFS.
@@ -42,46 +27,6 @@ typedef struct
 } Vertex_info;
 
 /**
- * @brief Aloca um novo nodo de vértice.
- * 
- * @param w Número do vértice
- * @param next Próximo nó da lista.
- * @retval ( Node ) - Novo nó alocado
- * @retval ( NULL ) - Ponteiro nulo indicando erro de alocação.
- */
-static Node newNode(vertex w, Node next)
-{
-    Node newNode = (Node) malloc(sizeof(struct node));
-    if(newNode == NULL)
-        return NULL;
-    newNode->w = w;
-    newNode->next = next;
-    return newNode;
-}
-
-/**
- * @brief Desaloca o vetor de listas de adjacências.
- * 
- * @param list Vetor de listas de adjacências.
- * @param V Número de vértices (tamanho do vetor de vértices).
- */
-static void freeList(Node *list, size_t V)
-{
-    vertex v;
-    Node temp;
-    for(v = 0; v < V; v++)
-    {
-        while(list[v] != NULL)
-        {
-            temp = list[v];
-            list[v] = list[v]->next;
-            free(temp); 
-        }
-    }
-    free(list);
-}
-
-/**
  * @brief Troca o valor de duas variáveis inteiras
  * 
  * @param a Variável a.
@@ -92,63 +37,6 @@ static void swap(int* a, int* b)
     int temp = *a;
     *a = *b;
     *b = temp;
-}
-
-/**
- * @brief Inicializa uma fila vazia
- * 
- * @retval ( queue ) - Fila vazia 
- * @retval ( NULL ) - Fila não alocada 
- */
-static Queue initQueue()
-{
-    Queue queue = (Queue)malloc(sizeof(struct Queue));
-    if(!queue)
-        return NULL;
-    queue->front = NULL;
-    queue->end = NULL;
-    return queue;
-}
-
-/**
- * @brief Adciona um vertex na fila 
- * 
- * @retval ( 0 ) - Falha ai criar um novo nó para adicionar na fila
- * @retval ( NULL ) - Inserção di nó a fila
- */
-static int enqueue(Queue queue, vertex v)
-{
-    Node new = newNode(v, NULL);
-    if(!new)
-        return 0;
-    if(queue->front == NULL)
-        queue->front = new;
-    else 
-        queue->end->next = new;
-    queue->end = new;
-    return 1;
-}
-
-/**
- * @brief Retira um vértex da fila
- * 
- * @retval ( -1 ) - Fila vazia
- * @retval ( v ) - Vertex da fila 
- */
-static vertex dequeue(Queue queue)
-{
-    if(queue->front == NULL)
-        return -1;
-    
-    Node temp = queue->front;
-    vertex v = temp->w;
-    queue->front = queue->front->next;
-
-    if(queue->front == NULL)
-        queue->end == NULL;
-    
-    free(temp);
-    return v;
 }
 
 /**
@@ -182,12 +70,12 @@ static void quicksort(int vet[], const int start, const int end)
  * @param v Vértice a qual seus adjacentes serão visitados
  * @param vertexes Vetor de vértices pertencentes ao Grafo
  */
-static void visit_Dfs(L_Graph G, vertex v, Vertex_info vertexes[])
+static void dfs_visit(L_Graph G, vertex v, Vertex_info vertexes[])
 {
     vertexes[v].color = 'G';  // Marcando o vértice como visitado
     vertex w;
 
-    Node head = G->adj[v];
+    Node head = G->adj[v]->head;
     while (head != NULL)
     {
         w = head->w;
@@ -195,7 +83,7 @@ static void visit_Dfs(L_Graph G, vertex v, Vertex_info vertexes[])
         {
             vertexes[w].father = v;
             vertexes[w].depth = vertexes[v].depth + 1;
-            visit_Dfs(G, w, vertexes);
+            dfs_visit(G, w, vertexes);
         }
         head = head->next;
     }
@@ -223,15 +111,16 @@ static vertex bfs_distancesVertex(L_Graph G, vertex v, Vertex_info vertexes[])
     }
 
     vertexes[v].color = 'G';
-    Queue Q = initQueue();
-    enqueue(Q, v);
+    Queue Q = q_initQueue();
+    q_enqueue(Q, v);
 
-    vertex u;
+    vertex u = 0;
     Node head;
-    while(Q->front != NULL)
+    while(!q_isEmpty(Q))
     {
-        u = dequeue(Q);
-        head = G->adj[u]; // Acessa a lista de adjacência do vértice u
+        u = q_dequeue(Q);
+
+        head = G->adj[u]->head; // Acessa a lista de adjacência do vértice u
         
         while (head != NULL)
         {
@@ -242,14 +131,13 @@ static vertex bfs_distancesVertex(L_Graph G, vertex v, Vertex_info vertexes[])
                 vertexes[w].color = 'G';
                 vertexes[w].father = u;
                 vertexes[w].depth = vertexes[u].depth + 1;
-                enqueue(Q, w);
+                q_enqueue(Q, w);
             }
             head = head->next; // Avança para o próximo vizinho na lista de adjacência
         }
         vertexes[u].color = 'B';
     }
-    
-    free(Q);
+    q_destroyQueue(&Q);
     return u;
 }
 
@@ -258,9 +146,9 @@ L_Graph lg_makeGraphFromFile(char *path)
     FILE *f = fopen(path, "r");
     if(f == NULL)
         return 0;
-    size_t V;
+    int V;
     vertex v, u;
-    if(!fscanf(f, "%lu", &V))
+    if(!fscanf(f, "%d", &V))
     {
         fclose(f);
         return 0;
@@ -271,7 +159,7 @@ L_Graph lg_makeGraphFromFile(char *path)
         fclose(f);
         return 0;
     }
-    while(fscanf(f, "%u %u", &v, &u) != EOF)
+    while(fscanf(f, "%d %d", &v, &u) != EOF)
         lg_insertEdge(G, v, u);
     fclose(f);
     return G;
@@ -280,18 +168,20 @@ L_Graph lg_makeGraphFromFile(char *path)
 L_Graph lg_makeGraph(size_t V)
 {
     L_Graph G = (L_Graph) malloc(sizeof(struct l_graph));
-    G->V = V;
+    G->V = (int) V;
     G->E = 0;
-    G->adj = (Node*) malloc(V * sizeof(Node));
+    G->adj = (List*) malloc(sizeof(struct list) * V); // aloca um vetor de listas
     vertex v;
-    for(v = 0; v < V; v++)
-        G->adj[v] = NULL;
+    for(v = 0; v < G->V; v++)
+        G->adj[v] = l_initList();
     return G;
 }
 
 void lg_destroyGraph(L_Graph *G)
 {
-    freeList((*G)->adj, (*G)->V);
+    vertex v;
+    for(v = 0; v < (*G)->V; v++)
+        l_destroyList(&(*G)->adj[v]);
     free(*G);
     *G = NULL;
 }
@@ -299,12 +189,10 @@ void lg_destroyGraph(L_Graph *G)
 int lg_insertEdge(L_Graph G, vertex v, vertex u)
 {
     v--; u--;
-    Node head;
-    for(head = G->adj[v]; head != NULL; head = head->next)
-        if(head->w == u)
-            return 0;
-    G->adj[v] = newNode(u, G->adj[v]);
-    G->adj[u] = newNode(v, G->adj[u]);
+    if(l_find(G->adj[v], u))
+        return 0;
+    l_insertBeggining(G->adj[v], u);
+    l_insertBeggining(G->adj[u], v);
     G->E++;
     return 1;
 }
@@ -312,59 +200,15 @@ int lg_insertEdge(L_Graph G, vertex v, vertex u)
 int lg_removeEdge(L_Graph G, vertex v, vertex u)
 {
     v--;u--;
-    Node previous = NULL;
-    Node current = G->adj[v];
-
-    while(current != NULL)
-    {
-        if((current)->w == u)
-        {
-            if(previous != NULL)
-                previous->next = current->next;
-            else
-                G->adj[v] = current->next;
-            free(current);
-            break;
-        } 
-        previous = current;
-        current = current->next;
-    }
-
-    if(current == NULL)
-        return 0;
-
-    previous = NULL;
-    current = G->adj[u];
-
-    while(current != NULL)
-    {
-        if((current)->w == v)
-        {
-            if(previous != NULL)
-                previous->next = current->next;
-            else
-                G->adj[u] = current->next;
-            free(current);
-            G->E--;
-            return 1;
-        } 
-        previous = current;
-        current = current->next;
-    }
+    l_remove(G->adj[v], u);
+    l_remove(G->adj[u], v);
     return 0;
 }
 
 int lg_getEdge(L_Graph G,vertex v, vertex u)
 {
-    v--;u--;
-    Node prox = G->adj[v];
-    while(prox != NULL)
-    {
-        if(prox->w == u)
-            return 1;
-        prox = prox->next;
-    }
-    return 0;
+    v--; u--;
+    return l_find(G->adj[v], u);
 }
 
 void lg_show(L_Graph G)
@@ -374,13 +218,7 @@ void lg_show(L_Graph G)
     for(i = 0; i < G->V; i++)
     {
         printf("%d: ", i+1);
-        Node adjacent = G->adj[i];
-        while(adjacent != NULL)
-        {
-            printf(" -> %d", adjacent->w+1);
-            adjacent = adjacent->next;
-        }
-        printf("\n");
+        l_show(G->adj[i]);
     }
 }
 
@@ -392,17 +230,10 @@ int lg_outputFile(L_Graph G, char *path)
         return 0;
     int vertexesDegrees[G->V], maxDegree = 0, minDegree = INT_MAX;
     double mediumDegree = 0, DegreeMedian;
-    Node adjacent;
     vertex v;
     for(v = 0; v < G->V; v++)
     {
-        vertexesDegrees[v] = 0;
-        adjacent = G->adj[v];
-        while(adjacent != NULL) // Calcula o grau de um vértice
-        {
-            vertexesDegrees[v]++;
-            adjacent = adjacent->next;
-        }
+        vertexesDegrees[v] = l_getSize(G->adj[v]);
         if(vertexesDegrees[v] < minDegree)// é o menor grau?
             minDegree = vertexesDegrees[v];
         if(vertexesDegrees[v] > maxDegree)// é o maior grau?
@@ -419,8 +250,8 @@ int lg_outputFile(L_Graph G, char *path)
         DegreeMedian = (vertexesDegrees[G->V / 2] + vertexesDegrees[(G->V / 2) + 1]) / 2.;
 
     //Saída para o arquivo
-    fprintf(f, "numberOfVertexes=%lu\n", G->V);
-    fprintf(f, "numberOfEdges=%lu\n", G->E);
+    fprintf(f, "numberOfVertexes=%d\n", G->V);
+    fprintf(f, "numberOfEdges=%d\n", G->E);
     fprintf(f, "minDegree=%d\n", minDegree);
     fprintf(f, "maxDegree=%d\n", maxDegree);
     fprintf(f, "mediumDegree=%lf\n", mediumDegree);
@@ -465,7 +296,7 @@ int lg_dfs(L_Graph G, vertex v, char *path)
     }
 
     // Chamando a DFS para cada vértice não visitado
-    visit_Dfs(G, v, vertexes);
+    dfs_visit(G, v, vertexes);
 
     // Escrevendo a saída no arquivo
     FILE *f = fopen(path, "w");
@@ -484,9 +315,10 @@ int lg_dfs(L_Graph G, vertex v, char *path)
 
 int lg_distance(L_Graph G, vertex v, vertex u)
 {
-    v--;u--;  
+    v--; u--;  
     if (v == u) 
         return 0;
+    
     Vertex_info vertexes[G->V];
     vertex w;
 
@@ -498,15 +330,15 @@ int lg_distance(L_Graph G, vertex v, vertex u)
     }
 
     vertexes[v].color = 'G';
-    Queue Q = initQueue();
-    enqueue(Q, v);
+    Queue Q = q_initQueue();
+    q_enqueue(Q, v);
 
     Node head;
     vertex y;
-    while (Q->front != NULL) 
+    while (!q_isEmpty(Q)) 
     {
-        y = dequeue(Q);
-        head = G->adj[y];  
+        y = q_dequeue(Q);
+        head = G->adj[y]->head;  
 
         while (head != NULL) 
         {
@@ -516,7 +348,7 @@ int lg_distance(L_Graph G, vertex v, vertex u)
                 vertexes[w].color = 'G';
                 vertexes[w].father = y;
                 vertexes[w].depth = vertexes[y].depth + 1;
-                enqueue(Q, w);
+                q_enqueue(Q, w);
             }
 
             if (w == u) 
@@ -526,10 +358,7 @@ int lg_distance(L_Graph G, vertex v, vertex u)
         }
         vertexes[y].color = 'B';
     }
-    while(Q->front != NULL)
-        dequeue(Q);
-    
-    free(Q);
+    q_destroyQueue(&Q);
 
     return vertexes[u].depth;  
 }
@@ -537,23 +366,23 @@ int lg_distance(L_Graph G, vertex v, vertex u)
 int lg_vertexEccentricity(L_Graph G, vertex v)
 {
     Vertex_info vertexes[G->V];
-    vertex w = bfs_distancesVertex(G,v,vertexes);
+    vertex w = bfs_distancesVertex(G, v, vertexes);
     return vertexes[w].depth;
 }
 
 int lg_absoluteDiameter(L_Graph G)
 {
-    vertex w;
+    vertex w = 0;
     int diameter = 0;
-    int diameterVerification = lg_vertexEccentricity(G,w);
-    if(diameterVerification == -1)
+    int eccentricity = lg_vertexEccentricity(G,w);
+    if(eccentricity == -1)
         return -1;
-    diameter = diameterVerification;
+    diameter = eccentricity;
     for(w = 1; w < G->V; w++)
     {
-        diameterVerification = lg_vertexEccentricity(G,w);
-        if(diameter < diameterVerification)
-            diameter = diameterVerification;
+        eccentricity = lg_vertexEccentricity(G,w);
+        if(diameter < eccentricity)
+            diameter = eccentricity;
     }
     return diameter;
 }

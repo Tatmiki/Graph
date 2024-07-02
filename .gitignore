@@ -1,6 +1,7 @@
 .vscode
 *.o
 *.a
+*.exe
 main
 main2
 
