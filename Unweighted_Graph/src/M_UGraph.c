@@ -5,6 +5,9 @@
 #include "../include/List.h"
 #include "../include/Queue.h"
 
+void* allocatedMemory[100];
+int allocatedNum = 0;
+
 /**
  * @brief Estrutura do grafo com representação em matriz de ajacência.
  */
@@ -22,8 +25,20 @@ typedef struct
 {
     char color;             /**< Cor do vértice ('W' - White, 'G' - Gray, 'B' - Black). **/
     int depth;              /**< Profundidade do vértice na árvore bfs ou dfs. **/
-    vertex father;         /**< Pai do vértice na árvore bfs ou dfs. **/
+    vertex father;          /**< Pai do vértice na árvore bfs ou dfs. **/
 } Vertex_info;
+
+typedef struct
+{
+    int id;
+    List vertexes;
+} ConnectedComponent;
+
+struct l_connected_components
+{
+    ConnectedComponent *list;
+    int size;
+};
 
 /** FUNÇÕES ESTÁTICAS **/
 
@@ -39,7 +54,7 @@ static int** allocMatrix(int m, int n, int initVal)
 {
     int **matrix = (int**) malloc(m * sizeof(int*));
     if(matrix == NULL)
-        return NULL;
+        exit(EXIT_FAILURE);
     int i, j;
     for(i = 0; i < m; i++)
     {
@@ -50,7 +65,7 @@ static int** allocMatrix(int m, int n, int initVal)
                 for(; i >= 0; i--)
                     free(matrix[i]);
             free(matrix);
-            return NULL;
+            exit(EXIT_FAILURE);
         }
         for(j = 0; j < n; j++)
             matrix[i][j] = initVal;
@@ -72,6 +87,26 @@ static void freeMatrix(int **matrix, int n)
         free(matrix[i]);
     }
     free(matrix);
+}
+
+static l_ConnectedComponents allocLCC()
+{
+    l_ConnectedComponents lcc = (l_ConnectedComponents) malloc(sizeof(struct l_connected_components));
+    if(lcc == NULL)
+        exit(EXIT_FAILURE);
+    lcc->list = (ConnectedComponent*) malloc(sizeof(ConnectedComponent) * 10);
+    if(lcc->list == NULL)
+        exit(EXIT_FAILURE);
+    lcc->size = 10; // capacidade alocada inicial
+    return lcc;
+}
+
+static void reallocLCC(l_ConnectedComponents lc, int newSize)
+{
+    lc->list = (ConnectedComponent*) realloc(lc->list, sizeof(ConnectedComponent) * newSize);
+    if(lc->list == NULL)
+        exit(EXIT_FAILURE);
+    lc->size = newSize;
 }
 
 /**
@@ -180,6 +215,45 @@ static vertex bfs_distances(M_Graph G, vertex v, Vertex_info vertexes[])
     return u; // Índice relativo ao vetor
 }
 
+static void dfs_visitCC(M_Graph G, vertex u, char visited[], ConnectedComponent *cc, int id)
+{
+    visited[u] = 'G';
+    vertex v;
+    for(v = 0; v < G->V; v++)
+    {
+        if(G->adj[u][v] == 1)
+            if(visited[v] == 'W')
+                dfs_visitCC(G, v, visited, cc, id);
+    }
+    visited[u] = 'B';
+    cc->id = id;
+    l_insertBeggining(cc->vertexes, u);
+}
+
+static void swapCC(ConnectedComponent* a, ConnectedComponent* b)
+{
+    ConnectedComponent temp = *a;
+    (*a).vertexes = (*b).vertexes;
+    (*b).vertexes = temp.vertexes;
+}
+
+static void quicksortLCC(ConnectedComponent vet[], const int start, const int end)
+{
+    int left = start, right = end, pivot = l_getSize(vet[(start+end)/2].vertexes);
+    do
+    {
+        while(l_getSize(vet[left].vertexes) > pivot) ++left;
+        while(l_getSize(vet[right].vertexes) < pivot) --right;
+        if(left <= right)
+        {
+            swapCC(&vet[left], &vet[right]); // troca as listas (o ID mantém)
+            left++; right--;
+        }
+    }while(left <= right);
+    if(right > start) quicksortLCC(vet, start, right); // ramo esquerdo
+    if(left < end) quicksortLCC(vet, left, end); // ramo direito
+}
+
 /** FUNÇÕES DA BIBLIOTECA **/
 
 M_Graph mg_makeGraphFromFile(char *path)
@@ -209,6 +283,8 @@ M_Graph mg_makeGraphFromFile(char *path)
 M_Graph mg_makeGraph(size_t V)
 {
     M_Graph G = (struct m_graph*) malloc(sizeof(struct m_graph));
+    if(G == NULL)
+        exit(EXIT_FAILURE);
     G->V = V;
     G->E = 0;
     G->adj = allocMatrix(V, V, 0);
@@ -275,7 +351,7 @@ int mg_outputFile(M_Graph G, char *path)
 
     int minDegree = INT_MAX, maxDegree = 0;
     double mediumDegree = 0, degreeMedian;
-    int vertexesDegrees[G->V];
+    int *vertexesDegrees = (int*) malloc(sizeof(int) * G->V);
     vertex i, j;
     for(i = 0; i < G->V; i++)
     {
@@ -308,13 +384,17 @@ int mg_outputFile(M_Graph G, char *path)
     fprintf(f, "degreeMedian=%lf\n", degreeMedian);
 
     fclose(f);
+    free(vertexesDegrees);
     return 1;
 }
 
 int mg_bfs(M_Graph G, vertex v, char *path)
 {
     v--;
-    Vertex_info vertexes[G->V];
+    Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
+    if(vertexes == NULL)
+        exit(EXIT_FAILURE);
+
     bfs_distances(G, v, vertexes);
     
     // SAÍDA
@@ -335,7 +415,9 @@ int mg_bfs(M_Graph G, vertex v, char *path)
 int mg_dfs(M_Graph G, vertex v, char *path)
 {
     v--;
-    Vertex_info vertexes[G->V];
+    Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
+    if(vertexes == NULL)
+        exit(EXIT_FAILURE);
     vertex w;
     for(w = 0; w < G->V; w++)
     {
@@ -350,13 +432,17 @@ int mg_dfs(M_Graph G, vertex v, char *path)
     // SAÍDA
     FILE *f = fopen(path, "w");
     if(f == NULL)
+    {
+        free(vertexes);
         return 0;
+    }
     for(w = 0; w < G->V; w++)
     {
         if(vertexes[w].color == 'B') // UM SET SERIA UMA BOA OPÇÃO PARA EVITAR ISSO E DEIXAR A EXIBIÇÃO ORDENADA!!!!!
             fprintf(f, "vertex=%u\tfather=%u\tdepth=%u\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
     }
     fclose(f);
+    free(vertexes);
     return 1;
 }
 
@@ -365,7 +451,9 @@ int mg_distance(M_Graph G, vertex v, vertex u)
     if(v == u)
         return 0;
     v--; u--;
-    Vertex_info vertexes[G->V];
+    Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
+    if(vertexes == NULL)
+        exit(EXIT_FAILURE);
     vertex w;
     for(w = 0; w < G->V; w++)
     {
@@ -391,7 +479,12 @@ int mg_distance(M_Graph G, vertex v, vertex u)
                     vertexes[w].father = t;
                     vertexes[w].depth = vertexes[t].depth + 1;
                     if(w == u)
-                        break;
+                    {
+                        q_destroyQueue(&Q);
+                        int distance = vertexes[u].depth;
+                        free(vertexes);
+                        return distance;
+                    }
                     q_enqueue(Q, w);
                 }
             }
@@ -399,18 +492,26 @@ int mg_distance(M_Graph G, vertex v, vertex u)
         vertexes[t].color = 'B';
     }
     q_destroyQueue(&Q);
-    if(w == u)
-        return vertexes[u].depth;
-    else 
-        return -1;
+    free(vertexes);
+    return -1;
 }
 
 int mg_vertexEccentricity(M_Graph G, vertex v)
 {
     v--;
-    Vertex_info vertexes[G->V];
-    vertex w = bfs_distances(G, v, vertexes);
-    return vertexes[w].depth;
+    Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
+    if(vertexes == NULL)
+        exit(EXIT_FAILURE);
+    vertex w = bfs_distances(G, v, vertexes), u;
+    for(u = 0; u < G->V; u++)
+        if(vertexes[u].color == 'W')
+        {
+            free(vertexes);
+            return -1;
+        }
+    int eccentricity = vertexes[w].depth;
+    free(vertexes);
+    return eccentricity;
 }
 
 int mg_absoluteDiameter(M_Graph G)
@@ -421,24 +522,92 @@ int mg_absoluteDiameter(M_Graph G)
     if(eccentricity == -1)
         return -1;
     diameter = eccentricity;
-    for(w = 1; w <= G->V; w++)
+    Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
+    for(w = 1; w < G->V; w++)
     {
-        eccentricity = mg_vertexEccentricity(G, w);
+        eccentricity = vertexes[bfs_distances(G, w, vertexes)].depth;
         if(diameter < eccentricity)
             diameter = eccentricity;
     }
+    free(vertexes);
     return diameter;
 }
 
 int mg_aprroximateDiameter(M_Graph G)
 {
-    Vertex_info vertexes[G->V];
+    Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
     vertex farthest = bfs_distances(G, 0, vertexes);
+    vertex u;
+    for(u = 0; u < G->V; u++)
+        if(vertexes[u].color == 'W')
+        {
+            free(vertexes);
+            return -1;
+        }
     farthest = bfs_distances(G, farthest, vertexes);
-    return vertexes[farthest].depth;
+    int diameter = vertexes[farthest].depth;
+    free(vertexes);
+    return diameter;
 }
 
-void mg_listConnectedComponents(M_Graph G)
+l_ConnectedComponents mg_connectedComponents(M_Graph G)
 {
-    
+    l_ConnectedComponents lcc = allocLCC(); // Lista de componentes conexos
+    int id = 0; // Índice de acesso aos componentes conexos da lista e identificador de cada componente
+    char *visited = (char*) malloc(G->V); // Salva o estado de visitado ou não de um vértice na dfs
+    if(visited == NULL)
+        exit(EXIT_FAILURE);
+    vertex v;
+    for(v = 0; v < G->V; v++)
+        visited[v] = 'W'; // inicializa todos como branco (não visitado)
+    for(v = 0; v < G->V; v++)
+    {
+        if(visited[v] == 'W')
+        {
+            lcc->list[id].vertexes = l_initList(); // inicializa a lista de vértices do novo componente
+            dfs_visitCC(G, v, visited, &lcc->list[id], id+1); // percorre os vértices do componente a partir de v
+            id++;
+            if(id == lcc->size) // caso falte posições na lista
+                reallocLCC(lcc, lcc->size * 2); // dobra-se o tamanho alocado atualmente
+        }
+    }
+    free(visited);
+    if(lcc->size != id)
+        reallocLCC(lcc, id); // reajusta o tamanho alocado da lista para o utilizado
+    quicksortLCC(lcc->list, 0, lcc->size-1); // ordena os componentes em ordem decrescente
+    return lcc;
+}
+
+int mg_getNumOfCComponents(l_ConnectedComponents lcc)
+{
+    return lcc->size;
+}
+
+void mg_listCComponents(l_ConnectedComponents lcc)
+{
+    printf("Há %d componente(s) conexo(s).\nListagem:\n", lcc->size);
+    int i;
+    for(i = 0; i < lcc->size; i++)
+    {
+        printf("\n~> Componentes [%d]:\n", lcc->list[i].id);
+        printf("      - Qantidade de vertices: %d\n", l_getSize(lcc->list[i].vertexes));
+    }
+}
+
+void mg_showCComponent(l_ConnectedComponents lcc, int id)
+{
+    printf("\n~ Componente [%d]:\n", lcc->list[id].id);
+    printf("      - Qnt. de vértices: %d\n", l_getSize(lcc->list[id].vertexes));
+    printf("      - Vértices pertencentes:\n         ");
+    l_show(lcc->list[id].vertexes);
+}
+
+void mg_destroyCComponents(l_ConnectedComponents *lcc)
+{
+    int i;
+    for(i = 0; i < (*lcc)->size; i++)
+        l_destroyList(&(*lcc)->list[i].vertexes);
+    free((*lcc)->list);
+    free(*lcc);
+    *lcc = NULL;
 }

@@ -36,6 +36,11 @@
  */
 typedef struct m_graph *M_Graph;
 
+/**
+ * @brief Estrutura para uma lista de componentes conexos que podem ser extraídos de um grafo.
+ */
+typedef struct l_connected_components *l_ConnectedComponents;
+
 
 /*****************************/
 /*   Funções da Biblioteca   */
@@ -207,14 +212,48 @@ int mg_absoluteDiameter(M_Graph G);
 int mg_aprroximateDiameter(M_Graph G);
 
 /**
- * @brief matrix_graph: Imprime informações sobre os componentes conexos de um grafo e lista os vértices pertencentes 
- * a cada um.
+ * @brief matrix_graph: Calcula e retorna um lista de componentes conectados do grafo. A partir dela pode-se
+ * utlizar funções adicionais da biblioteca que retornam a quantidade de componentes conexos, listam os
+ * os componentes em ordem decrescente e exibe os dados de um componente específico.
  * 
- * @details Serão impressos informações do tamanho (em vértices) dos componentes e a lista de vértices
- * pertencentes a cada um dos componentes. A listagem será feita em ordem decrescente (do maior ao menor).
+ * @warning Essa estrutura deve ser desalocada pela função mg_destroyCComponents
+ * 
+ * @see mg_getNumOfCComponents, mg_listCComponent, mg_showCComponent, mg_destroyCComponents
  * 
  * @param G Grafo em questão.
+ * 
+ * @retval ( l_ConnectedComponents ) - Um ponteiro para a estrutura alocada de lista de componentes conexos.
  */
-void mg_listConnectedComponents(M_Graph G);
+l_ConnectedComponents mg_connectedComponents(M_Graph G);
+
+/**
+ * @brief Retorna o número de componentes conexos extraídos de um grafo.
+ * 
+ * @param l Lista de componentes conexos anteriormente extraída.
+ * @return Quantidade de componentes na lista.
+ */
+int mg_getNumOfCComponents(l_ConnectedComponents l);
+
+/**
+ * @brief Lista os componentes e seus tamanhos de forma crescente de uma lista de componentes conexos.
+ * 
+ * @param l Lista de componentes conexos anteriormente extraída.
+ */
+void mg_listCComponents(l_ConnectedComponents l);
+
+/**
+ * @brief Exibe as informações de tamanho e exibe os vértices pertencentes a um componente conexo.
+ * 
+ * @param l Lista de componentes conexos anteriormente extraída.
+ * @param id Identificador do componente em questão. O identificador pode ser encontrado na função mg_listCComponents.
+ */
+void mg_showCComponent(l_ConnectedComponents l, int id);
+
+/**
+ * @brief Desaloca a memória de uma lista de componentes conexos.
+ * 
+ * @param l Lista de componentes conexos anteriormente extraída.
+ */
+void mg_destroyCComponents(l_ConnectedComponents *l);
 
 #endif
