@@ -26,6 +26,79 @@ typedef struct
     int depth;
 } Vertex_info;
 
+typedef struct 
+{
+    List vertexes;
+    int id;
+}ConnectedComponent;
+
+struct l_connected_components
+{
+    ConnectedComponent *list;
+    int size;
+};
+
+static l_ConnectedComponents initListCC()
+{
+    l_ConnectedComponents lc = (l_ConnectedComponents) malloc(sizeof(l_ConnectedComponents));
+    if(lc == NULL)
+        exit(EXIT_FAILURE);
+    lc->list = (ConnectedComponent*) malloc(sizeof(ConnectedComponent) * 10);
+    if(lc->list == NULL)
+        exit(EXIT_FAILURE);
+    lc->size = 10;
+    return lc;
+}
+
+static void reallocCC(l_ConnectedComponents lc, int newSize)
+{
+    lc->list = (ConnectedComponent*) realloc(lc->list, sizeof(ConnectedComponent) * newSize);
+    if(lc->list == NULL)
+        exit(EXIT_FAILURE);
+    lc->size = newSize;
+}
+
+
+static void swapCC(ConnectedComponent *a, ConnectedComponent *b)
+{
+    ConnectedComponent temp = *a;
+    (*a).vertexes = (*b).vertexes;
+    (*b).vertexes = temp.vertexes;
+}
+
+static void quicksortCC(ConnectedComponent vet[], const int start, const int end)
+{
+    int left = start, right = end, pivot = l_getSize(vet[(start+end)/2].vertexes);
+    do
+    {
+        
+        while(l_getSize(vet[left].vertexes) > pivot) ++left;
+        while(l_getSize(vet[right].vertexes) < pivot) --right;
+        if(left <= right)
+        {
+            swapCC(&vet[left], &vet[right]);
+            left++; right--;
+        }
+    }while(left <= right);
+    
+    if(right > start) quicksortCC(vet, start, right); // ramo esquerdo
+    if(left < end) quicksortCC(vet, left, end); // ramo direito
+}
+
+static void dfsRconComps(L_Graph G, vertex u, char visited[] ,ConnectedComponent *cc, int id)
+{
+    visited[u] = 'G';
+    Node head;
+    for(head = G->adj[u]->head; head != NULL; head = head->next)
+    {
+        if(visited[head->w] == 'W')
+            dfsRconComps(G, head->w, visited, cc, id);
+    }
+    visited[u] = 'B';
+    cc->id = id;
+    l_insertBeggining(cc->vertexes, u);
+}
+
 /**
  * @brief Troca o valor de duas variáveis inteiras
  * 
@@ -351,22 +424,27 @@ int lg_distance(L_Graph G, vertex v, vertex u)
                 q_enqueue(Q, w);
             }
 
-            if (w == u) 
-                break;
-
+            if (w == u)
+            {
+                q_destroyQueue(Q);
+                return vertexes[u].depth;  
+            }
             head = head->next; 
         }
         vertexes[y].color = 'B';
     }
     q_destroyQueue(&Q);
-
-    return vertexes[u].depth;  
+    return -1;  
 }
 
 int lg_vertexEccentricity(L_Graph G, vertex v)
 {
     Vertex_info vertexes[G->V];
     vertex w = bfs_distancesVertex(G, v, vertexes);
+    vertex u;
+    for(u = 0; u < G->V; u++)
+        if(vertexes[u].color == 'W')
+            return -1;
     return vertexes[w].depth;
 }
 
@@ -378,9 +456,10 @@ int lg_absoluteDiameter(L_Graph G)
     if(eccentricity == -1)
         return -1;
     diameter = eccentricity;
+    Vertex_info vertexes[G->V];
     for(w = 1; w < G->V; w++)
     {
-        eccentricity = lg_vertexEccentricity(G,w);
+        eccentricity = vertexes[bfs_distancesVertex(G, w, vertexes)].depth;
         if(diameter < eccentricity)
             diameter = eccentricity;
     }
@@ -390,14 +469,68 @@ int lg_absoluteDiameter(L_Graph G)
 int lg_aprroximateDiameter(L_Graph G)
 {
     Vertex_info vertexes[G->V];
-
     vertex v = bfs_distancesVertex(G, 0, vertexes);
+    vertex u;
+    for(u = 0; u < G->V; u++)
+        if(vertexes[u].color == 'W')
+            return -1;
     v = bfs_distancesVertex(G, v, vertexes);
-
     return vertexes[v].depth;
 }
 
-void lg_listConnectedComponents(L_Graph G)
+l_ConnectedComponents lg_connectedComponents(L_Graph G)
 {
-    
+    l_ConnectedComponents lc = initListCC();
+    vertex v;
+    char vertexes[G->V];
+    int id = 0;
+    for(v = 0; v < G->V; v++)
+        vertexes[v] = 'W';
+    for(v = 0; v < G->V; v++)
+    {
+        if(vertexes[v] == 'W')
+        {
+            lc->list[id].vertexes = l_initList();
+            dfsRconComps(G, v, vertexes, &lc->list[id], id+1);
+            id++;
+            if(lc->size == id)
+                reallocCC(lc, lc->size * 2);
+        }
+    }
+    if(id != lc->size)
+        reallocCC(lc, id);
+    printf("\n%d %d",lc->size, l_getSize(lc->list[1].vertexes));
+    quicksortCC(lc->list, 0, lc->size - 1);
+    return lc;
+}
+
+int lg_quantCC(l_ConnectedComponents lcc)
+{
+    return lcc->size;
+}
+
+void lg_listCComponents(l_ConnectedComponents lcc)
+{   
+    printf("Há %d componente(s) conexo(s).\nListagem:\n", lcc->size);
+    int i;
+    for(i = 0; i < lcc->size; i++)
+        lg_showCComponent(lcc, i);
+}
+
+void lg_showCComponent(l_ConnectedComponents lcc, int index)
+{
+    printf("\n~> Componentes [%d]:\n", lcc->list[index].id);
+    printf("\t- Qantidade de vertices: %d\n", l_getSize(lcc->list[index].vertexes));
+    printf("\t- Vertices pertencentes ao componente:\n");
+    l_show(lcc->list[index].vertexes);
+}
+
+void lg_destroyCComponents(l_ConnectedComponents *lcc)
+{
+    int i;
+    for(i = 0; i < (*lcc)->size; i++)
+        l_destroyList(&(*lcc)->list[i].vertexes);
+    free((*lcc)->list);
+    free(*lcc);
+    *lcc = NULL; 
 }

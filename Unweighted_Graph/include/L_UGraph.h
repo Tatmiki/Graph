@@ -36,6 +36,7 @@
  */
 typedef struct l_graph *L_Graph;
 
+typedef struct l_connected_components *l_ConnectedComponents;
 
 /*****************************/
 /*   Funções da Biblioteca   */
@@ -215,6 +216,14 @@ int lg_aprroximateDiameter(L_Graph G);
  * 
  * @param G Grafo em questão.
  */
-void lg_listConnectedComponents(L_Graph G);
+l_ConnectedComponents lg_connectedComponents(L_Graph G);
+
+int lg_getNumOfCComponents(l_ConnectedComponents l);
+
+void lg_listCComponents(l_ConnectedComponents l);
+
+void lg_showCComponent(l_ConnectedComponents l, int index); 
+
+void lg_destroyCComponents(l_ConnectedComponents *l);
 
 #endif
