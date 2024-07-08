@@ -10,8 +10,7 @@ all: lib main
 
 lib: 	$(BIN)/List.o 		\
 		$(BIN)/Queue.o		\
-		$(BIN)/M_UGraph.o 	\
-		$(BIN)/L_UGraph.o 	
+		$(BIN)/Graph.o
 	ar -rcs $(LIB)/libGraph.a $(BIN)/*.o
 
 main: $(SRC)/main.c $(SRC)/main2.c

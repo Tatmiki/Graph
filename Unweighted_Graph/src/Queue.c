@@ -12,18 +12,31 @@
 #include "../include/Queue.h"
 #include <stdlib.h>
 
+/**
+ * @brief Estrutura de nó para a fila encadeada dinâmica.
+ */
 typedef struct node 
 {
-    int w;
-    struct node* next;
+    int w;              /*> Elemento inteiro.           */
+    struct node* next;  /*> Nó para o próximo elemento. */
 } *Node;
 
+/**
+ * @brief Estrutura de fila encadeada dinãmica.
+ */
 struct queue
 {
-    Node front;
-    Node end;
+    Node front; /*> Frente da fila. */
+    Node end;   /*> Final da fila.  */
 };
 
+/**
+ * @brief Cria um novo nó encadeado.
+ * 
+ * @param w Novo elemento;
+ * @param next Edereço ao encadeamento do próximo desse elemento.
+ * @return ( Node ) Alocado e inicializado com os parâmetros passados.
+ */
 static Node newNode(int w, Node next)
 {
     Node newNode = (Node) malloc(sizeof(struct node));

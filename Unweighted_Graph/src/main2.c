@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../include/M_UGraph.h"
+#include "../include/Graph.h"
 
 int main()
 {
@@ -9,9 +9,9 @@ int main()
     //printf("Diametro absoluto do grafo: %d\n", mg_absoluteDiameter(G));
     printf("Distância entre os vértices 2 e 1: %d\n", mg_distance(G, 1, 2));
     l_ConnectedComponents lcc = mg_connectedComponents(G);
-    mg_listCComponents(lcc);
+    cc_listCComponents(lcc);
     printf("sair: "); getchar();
-    mg_destroyCComponents(&lcc);
+    cc_destroyCComponents(&lcc);
     mg_destroyGraph(&G);    
 }
 
