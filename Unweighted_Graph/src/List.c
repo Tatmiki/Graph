@@ -13,6 +13,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/**
+ * @brief Cria um novo nó encadeado.
+ * 
+ * @param w Novo elemento;
+ * @param next Edereço ao encadeamento do próximo desse elemento.
+ * @return ( Node ) Alocado e inicializado com os parâmetros passados.
+ */
 static Node newNode(int w, Node next)
 {
     Node newNode = (Node) malloc(sizeof(struct node));

@@ -4,5 +4,9 @@
 *.exe
 main
 main2
+grafo_3.txt
+grafo_4.txt
+grafo_5.txt
+grafo_6.txt
 
 !*.gitkeep
