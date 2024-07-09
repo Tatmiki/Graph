@@ -1,0 +1,6 @@
+numberOfVertexes=4843750
+numberOfEdges=13168918
+minDegree=1
+maxDegree=22
+mediumDegree=5.437489
+DegreeMedian=5.000000
