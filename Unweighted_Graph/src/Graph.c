@@ -119,12 +119,13 @@ static l_ConnectedComponents allocLCC()
  * @param lc Lista em questão;
  * @param newSize Novo tamanho da lista.
  */
-static void reallocLCC(l_ConnectedComponents lc, int newSize)
+static int reallocLCC(l_ConnectedComponents lc, int newSize)
 {
     lc->list = (ConnectedComponent*) realloc(lc->list, sizeof(ConnectedComponent) * newSize);
     if(lc->list == NULL)
-        exit(EXIT_FAILURE);
+        return 0;
     lc->size = newSize;
+    return 1;
 }
 
 /**
@@ -165,7 +166,6 @@ static void quicksortLCC(ConnectedComponent vet[], const int start, const int en
     if(right > start) quicksortLCC(vet, start, right); // ramo esquerdo
     if(left < end) quicksortLCC(vet, left, end); // ramo direito
 }
-
 
 // list_graph----------------------------------------------------------------------------------
 
@@ -318,7 +318,7 @@ L_Graph lg_makeGraph(int V)
     L_Graph G = (L_Graph) malloc(sizeof(struct l_graph));
     if(G == NULL)
         return NULL;
-    G->V = (int) V;
+    G->V = V;
     G->E = 0;
     G->adj = (List*) malloc(sizeof(struct list) * V); // aloca um vetor de listas
     if(G->adj == NULL)
@@ -683,7 +683,6 @@ int lg_aprroximateDiameter(L_Graph G)
     return aprroximateDiameter;
 }
 
-//TODO: RETORNAR NULO
 l_ConnectedComponents lg_connectedComponents(L_Graph G)
 {
     l_ConnectedComponents lc = allocLCC();
@@ -692,7 +691,10 @@ l_ConnectedComponents lg_connectedComponents(L_Graph G)
     vertex v;
     char *vertexes = (char*) malloc(G->V);
     if(vertexes == NULL)
-        exit(EXIT_FAILURE);
+    {
+        cc_destroyCComponents(&lc);
+        return NULL;
+    }
     int id = 0;
     for(v = 0; v < G->V; v++)
         vertexes[v] = 'W';
@@ -709,7 +711,8 @@ l_ConnectedComponents lg_connectedComponents(L_Graph G)
     }
     free(vertexes);
     if(id != lc->size)
-        reallocLCC(lc, id);
+        if(!reallocLCC(lc, id))
+            return NULL;
     quicksortLCC(lc->list, 0, lc->size - 1);
     return lc;
 }
@@ -1237,14 +1240,18 @@ int mg_aprroximateDiameter(M_Graph G)
     return diameter;
 }
 
-//TODO: RETORNAR NULO
 l_ConnectedComponents mg_connectedComponents(M_Graph G)
 {
     l_ConnectedComponents lcc = allocLCC(); // Lista de componentes conexos
+    if(lcc == NULL)
+        return NULL;
     int id = 0; // Índice de acesso aos componentes conexos da lista e identificador de cada componente
     char *visited = (char*) malloc(G->V); // Salva o estado de visitado ou não de um vértice na dfs
     if(visited == NULL)
-        exit(EXIT_FAILURE);
+    {
+        cc_destroyCComponents(&lcc);
+        return NULL;
+    }
     vertex v;
     for(v = 0; v < G->V; v++)
         visited[v] = 'W'; // inicializa todos como branco (não visitado)
@@ -1261,7 +1268,8 @@ l_ConnectedComponents mg_connectedComponents(M_Graph G)
     }
     free(visited);
     if(lcc->size != id)
-        reallocLCC(lcc, id); // reajusta o tamanho alocado da lista para o utilizado
+        if(!reallocLCC(lcc, id)) // reajusta o tamanho alocado da lista para o utilizado
+            return NULL; 
     quicksortLCC(lcc->list, 0, lcc->size-1); // ordena os componentes em ordem decrescente
     return lcc;
 }
