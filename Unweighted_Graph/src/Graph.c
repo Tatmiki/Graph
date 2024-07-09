@@ -1,15 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
-#include <time.h>
 #include "../include/Graph.h"
 #include "../include/List.h"
 #include "../include/Queue.h"
 #include "../include/Stack.h"
-
-clock_t clock_begin = 0;
-clock_t clock_end = 0;
-double time_lapsed = 0;
 
 /**
  * @brief Estrutura do grafo com representação em lista de ajacência.
@@ -59,7 +54,7 @@ struct l_connected_components
     int size;                   /*> Tamanho da lista.               */
 };
 
-//----------------------------------------------------------------------------------
+// static_functions----------------------------------------------------------------------------------
 
 /**
  * @brief Troca o valor de duas variáveis inteiras
@@ -107,10 +102,13 @@ static l_ConnectedComponents allocLCC()
 {
     l_ConnectedComponents lc = (l_ConnectedComponents) malloc(sizeof(struct l_connected_components));
     if(lc == NULL)
-        exit(EXIT_FAILURE);
+        return NULL;
     lc->list = (ConnectedComponent*) malloc(sizeof(ConnectedComponent) * 10);
     if(lc->list == NULL)
-        exit(EXIT_FAILURE);
+    {
+        free(lc);
+        return NULL;
+    }
     lc->size = 10;
     return lc;
 }
@@ -169,7 +167,7 @@ static void quicksortLCC(ConnectedComponent vet[], const int start, const int en
 }
 
 
-//----------------------------------------------------------------------------------
+// list_graph----------------------------------------------------------------------------------
 
 /**
  * @brief Realiza a BFS para identificar um componente conexo de um grafo marcando todos os vértices alcançáveis
@@ -283,6 +281,12 @@ static vertex lg_bfs_distances(L_Graph G, vertex v, Vertex_info vertexes[])
     }
     q_destroyQueue(&Q);
     return u;
+}
+
+unsigned long long lg_representationSize(int V, int E)
+{
+    // custo da estrutura + custo do vetor de lista + custo dos nós de adjacências
+    return sizeof(struct l_graph) + V * sizeof(struct list) + E * sizeof(struct node);
 }
 
 L_Graph lg_makeGraphFromFile(char *path)
@@ -496,6 +500,15 @@ int lg_recursiveDfs(L_Graph G, vertex v, char *path)
 
 int lg_iterativeDfs(L_Graph G, vertex v, char *path)
 {
+    /*
+        Problema dessa implementação comparado a recursiva:
+            - A volta da recursão garante que as adjacências já verificadas
+            antes de chamar a recursão não serão vistas novamente (função
+            continua de onde parou), enquanto nessa implementação sempre que 
+            desempilhamos um vértice e vamos para o anterior, este mesmo 
+            analisa todas as adjacências novamente, mesmo as já analisadas 
+            antes de ser empilhado.
+    */
     v--;
     Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
     if(vertexes == NULL)
@@ -535,16 +548,7 @@ int lg_iterativeDfs(L_Graph G, vertex v, char *path)
                 break;
             }
             else
-            {
-                if(head->next == NULL)
-                {
-                    vertexes[u].color = 'B';
-                    s_pop(S);
-                    break;
-                }
-                else
-                    head = head->next;
-            }
+                head = head->next;
         }
     }
     s_destroyStack(&S);
@@ -683,6 +687,8 @@ int lg_aprroximateDiameter(L_Graph G)
 l_ConnectedComponents lg_connectedComponents(L_Graph G)
 {
     l_ConnectedComponents lc = allocLCC();
+    if(lc == NULL)
+        return NULL;
     vertex v;
     char *vertexes = (char*) malloc(G->V);
     if(vertexes == NULL)
@@ -708,7 +714,7 @@ l_ConnectedComponents lg_connectedComponents(L_Graph G)
     return lc;
 }
 
-//----------------------------------------------------------------------------------
+// matrix_graph----------------------------------------------------------------------------------
 
 /**
  * @brief Função para alocar e retornar uma matriz de inteiros.
@@ -850,6 +856,12 @@ static void mg_dfsCComponents(M_Graph G, vertex u, char visited[], ConnectedComp
     visited[u] = 'B';
     cc->id = id;
     l_insertBeggining(cc->vertexes, u);
+}
+
+unsigned long long mg_representationSize(int V)
+{
+    // custo da estrutura + custo da matriz de adjacências
+    return sizeof(struct m_graph) + (V * V) * sizeof(int); 
 }
 
 M_Graph mg_makeGraphFromFile(char *path)
@@ -1054,7 +1066,71 @@ int mg_recursiveDfs(M_Graph G, vertex v, char *path)
 
 int mg_iterativeDfs(M_Graph G, vertex v, char *path)
 {
+    /*
+        Problema dessa implementação comparado a recursiva:
+            - A volta da recursão garante que as adjacências já verificadas
+            antes de chamar a recursão não serão vistas novamente (função
+            continua de onde parou), enquanto nessa implementação sempre que 
+            desempilhamos um vértice e vamos para o anterior, este mesmo 
+            analisa todas as adjacências novamente, mesmo as já analisadas 
+            antes de ser empilhado.
+    */
+    v--;
+    Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
+    if(vertexes == NULL)
+        exit(EXIT_FAILURE);
+    vertex u, w;
+    for(w = 0; w < G->V; w++)
+    {
+        vertexes[w].color = 'W';
+        vertexes[w].depth = 0;
+        vertexes[w].father = -1;
+    }
 
+    Stack S = s_initStack();
+
+    vertexes[v].color = 'G';
+    s_push(S, v);
+    while(!s_isEmpty(S))
+    {
+        u = s_top(S);
+        for(w = 0; w < G->V; w++)
+        {
+            if(G->adj[u][w] == 1)
+            {
+                if (vertexes[w].color == 'W')
+                {
+                    vertexes[w].color = 'G';
+                    vertexes[w].father = u;
+                    vertexes[w].depth = vertexes[u].depth + 1;
+                    s_push(S, w);
+                    break;
+                }
+            }
+        }
+        if(w == G->V)
+        {
+            vertexes[u].color = 'B';
+            s_pop(S);
+        }
+    }
+    s_destroyStack(&S);
+
+    // Escrevendo a saída no arquivo
+    FILE *f = fopen(path, "w");
+    if (!f)
+    {
+        free(vertexes);
+        return 0;
+    }
+    for (w = 0; w < G->V; w++)
+    {
+        if(vertexes[w].color == 'B')
+            fprintf(f, "vertex=%u\tfather=%d\tdepth=%d\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
+    }
+    fclose(f);
+    free(vertexes);
+    return 1;
 }
 
 int mg_distance(M_Graph G, vertex v, vertex u)
@@ -1190,7 +1266,7 @@ l_ConnectedComponents mg_connectedComponents(M_Graph G)
     return lcc;
 }
 
-//----------------------------------------------------------------------------------
+// connected_components----------------------------------------------------------------------------------
 
 int cc_getNumOfCComponents(l_ConnectedComponents lcc)
 {

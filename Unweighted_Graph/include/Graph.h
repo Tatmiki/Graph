@@ -54,6 +54,16 @@ typedef struct l_connected_components *l_ConnectedComponents;
 /*****************************/
 
 /**
+ * @brief list_graph: Retorna o tamanho em bytes da representação de um grafo de V vértices e E arestas com lista de adjacências.
+ * 
+ * @param V Quantidade de vértices que seriam representados;
+ * @param E Quantidade de arestas que seriam representadas.
+ * 
+ * @return Valor em bytes da representação.
+ */
+unsigned long long lg_representationSize(int V, int E);
+
+/**
  * @brief list_graph: Cria um grafo a partir de um arquivo texto de adjacências, contendo 
  * em sua primeira linha o número de vértices e as seguintes as adjacências.
  *
@@ -280,6 +290,15 @@ int lg_aprroximateDiameter(L_Graph G);
 l_ConnectedComponents lg_connectedComponents(L_Graph G);
 
 //----------------------------------------------------------------------------------
+
+/**
+ * @brief matriz_graph: Retorna o tamanho em bytes da representação de um grafo de V vértices com matriz de adjacências.
+ * 
+ * @param V Quantidade de vértices que seriam representados.
+ * 
+ * @return Valor em bytes da representação.
+ */
+unsigned long long mg_representationSize(int V);
 
 /**
  * @brief matrix_graph: Cria a partir de um arquivo texto de adjacências, contendo 
