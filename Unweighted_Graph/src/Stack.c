@@ -69,7 +69,7 @@ void s_push(Stack s, int w)
 
 int s_pop(Stack s)
 {
-    Node w = s->top->w;
+    int w = s->top->w;
     Node temp = s->top;
     s->top = s->top->next;
     free(temp);

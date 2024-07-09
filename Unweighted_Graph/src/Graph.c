@@ -1209,7 +1209,7 @@ void cc_listCComponents(l_ConnectedComponents lcc)
     for(i = 0; i < lcc->size; i++)
     {
         printf("\n~> Componentes [%d]:\n", lcc->list[i].id);
-        printf("      - Quantidade de vertices: %d\n", cc_getSizeCComponent(lcc, i));
+        printf("      - Quantidade de vertices: %d\n", cc_getSizeCComponent(lcc, i+1));
     }
 }
 
