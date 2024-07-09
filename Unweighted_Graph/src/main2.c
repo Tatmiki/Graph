@@ -63,6 +63,7 @@ int main()
         switch(opc)
         {
             case 1:
+                mg_destroyGraph(&G);
                 printf("\n~> Informe a quantidade de verteces: ");
                 scanf("%d", &verteces);
                 G = mg_makeGraph(verteces);
@@ -72,6 +73,7 @@ int main()
                     printf("Criacao do grafo concluida!\n");
                 break;
             case 2:
+                mg_destroyGraph(&G);
                 printf("\n~> Informe o arquivo: ");
                 scanf(" %s", arquivo);
                 G = mg_makeGraphFromFile(arquivo);
@@ -81,7 +83,7 @@ int main()
                     printf("Criacao do grafo concluida!\n");
                 break;
             case 3:
-                if(G != NULL && 1) //Adicionar G->V
+                if(G != NULL && mg_getNumOfVertexes(G) > 1) //Adicionar G->V
                 {
                     printf("\n~> Informe quantas arestas deseja adicionar: ");
                     scanf("%d", &quant);
@@ -99,14 +101,14 @@ int main()
                     }
                     printf("Insercao completa!\n");
                 }
-                else if(0)
-                    printf("Quantidade de vertices = 1\nNecessario mais de 1 vertice para adcionar arestas");
+                else if(mg_getNumOfVertexes(G) < 2)
+                    printf("A quantidade de vertices deve ser maior que 1 para se efetuar uma adicao de aresta!\n");
                 
                 else
                     printf("Grafo nao criado...\n");
                 break;
             case 4:
-                if(G != NULL && 1) //Adicionar G->V
+                if((G != NULL && mg_getNumOfVertexes(G) > 1) && mg_getNumOfEdges(G) > 0) //Adicionar G->V
                 {
                     printf("\n~> Informe quantas arestas deseja remover: ");
                     scanf("%d", &quant);
@@ -122,7 +124,7 @@ int main()
                     }
                     printf("Remocao completa!\n");
                 }
-                else if(0)
+                else if(mg_getNumOfVertexes(G) < 2 || mg_getNumOfEdges(G) < 1)
                     printf("Quantidade de vertices = 1\nNecessario mais de 1 vertice para remover arestas\n");
                 else
                     printf("Grafo nao criado...\n");               
@@ -162,7 +164,7 @@ int main()
                     scanf("%s", arquivo);
                     printf("Informe de qual vertice deseja iniciar a DFS: ");
                     scanf("%u",&vertece1);
-                    if(mg_dfs(G,vertece1,arquivo))
+                    if(mg_iterativeDfs(G,vertece1,arquivo))
                         printf("Arquivo de saída criado com sucesso!\n");
                     else    
                         printf("Falha na criação do arquivo...\n");
@@ -227,10 +229,6 @@ int main()
                 lcc = mg_connectedComponents(G);
                 if(lcc != NULL)
                 {
-                    //Quantidade de componentes conexos do grafo
-                    //Listagem dos componentes
-                    //Exibição de um componente específico
-                    //Tamanho de um componente específico
                     printf("Quantidade de componentes conexos: %d\n", cc_getNumOfCComponents(lcc));
                     cc_listCComponents(lcc);
                     printf("\nInforme o id do componente para exibi-lo(Ids informados acima): ");
