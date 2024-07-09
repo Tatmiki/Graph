@@ -94,8 +94,8 @@ void lg_destroyGraph(L_Graph *G);
  * @param v Vértice v de origem/entrada;
  * @param u Vértice u de origem/entrada.
  * 
- * @retval 0 - para inserção bem-sucedida;
- * @retval 1 - caso a aresta já exista ou algum parâmetro seja incoerente.
+ * @retval 1 - para inserção bem-sucedida;
+ * @retval 0 - caso a aresta já exista ou algum parâmetro seja incoerente.
  */
 int lg_insertEdge(L_Graph G, vertex v, vertex u);
 
@@ -106,8 +106,8 @@ int lg_insertEdge(L_Graph G, vertex v, vertex u);
  * @param v Vértice v de origem/destino;
  * @param u Vértice u de origem/destino.
  * 
- * @retval 0 - se a remoção foi bem-sucedida;
- * @retval 1 - caso a aresta não exista ou algum parâmetro seja incoerente.
+ * @retval 1 - se a remoção foi bem-sucedida;
+ * @retval 0 - caso a aresta não exista ou algum parâmetro seja incoerente.
  */
 int lg_removeEdge(L_Graph G, vertex v, vertex u);
 
@@ -122,6 +122,23 @@ int lg_removeEdge(L_Graph G, vertex v, vertex u);
  * @retval 0 - NÃO existe uma aresta entre u e v.
  */
 int lg_getEdge(L_Graph G, vertex v, vertex u);
+
+/**
+ * @brief list_graph: Retorna o número de vértices do grafo.
+ * 
+ * @param G Grafo em questão.
+ * 
+ * @return int - Número de vértices do grafo.
+ */
+int lg_getNumOfVertexes(L_Graph G);
+
+/**
+ * @brief list_graph: Retorna o número de arestas do grafo.
+ * 
+ * @param G Grafo em questão.
+ * @return int - Número de arestas do grafo.
+ */
+int lg_getNumOfEdges(L_Graph G);
 
 /**
  * @brief list_graph: Exibe o grafo de lista de adjacências.
@@ -159,7 +176,8 @@ int lg_outputFile(L_Graph G, char *path);
 int lg_bfs(L_Graph G, vertex v, char *path);
 
 /**
- * @brief list_graph: Percorre o grafo usando a busca em profundidade e gera um arquivo de texto da árvore geradora.
+ * @brief list_graph: Percorre o grafo usando a busca em profundidade resursiva e gera um arquivo 
+ * de texto da árvore geradora.
  * 
  * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (0).
  * 
@@ -170,7 +188,22 @@ int lg_bfs(L_Graph G, vertex v, char *path);
  * @retval 1 - Arquivo de saída gerado com sucesso;
  * @retval 0 - Erro na geração do arquivo de saída.
  */
-int lg_dfs(L_Graph G, vertex v, char *path);
+int lg_recursiveDfs(L_Graph G, vertex v, char *path);
+
+/**
+ * @brief list_graph: Percorre o grafo usando a busca em profundidade iterativa e gera um arquivo 
+ * de texto da árvore geradora.
+ * 
+ * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (0).
+ * 
+ * @param G Grafo a ser percorrido;
+ * @param v Vértice inicial;
+ * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
+ *  
+ * @retval 1 - Arquivo de saída gerado com sucesso;
+ * @retval 0 - Erro na geração do arquivo de saída.
+ */
+int lg_iterativeDfs(L_Graph G, vertex v, char *path);
 
 /**
  * @brief list_graph: Calcula a distância entre dois vértices utilizando BFS.
@@ -319,6 +352,23 @@ int mg_removeEdge(M_Graph G, vertex v, vertex u);
 int mg_getEdge(M_Graph G, vertex v, vertex u);
 
 /**
+ * @brief matrix_graph: Retorna o número de vértices do grafo.
+ * 
+ * @param G Grafo em questão.
+ * 
+ * @return int - Número de vértices do grafo.
+ */
+int mg_getNumOfVertexes(M_Graph G);
+
+/**
+ * @brief matrix_graph: Retorna o número de arestas do grafo.
+ * 
+ * @param G Grafo em questão.
+ * @return int - Número de arestas do grafo.
+ */
+int mg_getNumOfEdges(M_Graph G);
+
+/**
  * @brief matrix_graph: Exibe a matriz de adjacências.
  * 
  * @param G Grafo a ser exibido.
@@ -354,7 +404,8 @@ int mg_outputFile(M_Graph G, char *path);
 int mg_bfs(M_Graph G, vertex v, char *path);
 
 /**
- * @brief matrix_graph: Percorre o grafo usando a busca em profundidade e gera um arquivo de texto da árvore geradora.
+ * @brief matrix_graph: Percorre o grafo usando a busca em profundidade recursiva e gera um arquivo 
+ * de texto da árvore geradora.
  * 
  * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (0).
  * 
@@ -365,7 +416,22 @@ int mg_bfs(M_Graph G, vertex v, char *path);
  * @retval 1 - Arquivo de saída gerado com sucesso;
  * @retval 0 - Erro na geração do arquivo de saída.
  */
-int mg_dfs(M_Graph G, vertex v, char *path);
+int mg_recursiveDfs(M_Graph G, vertex v, char *path);
+
+/**
+ * @brief matrix_graph: Percorre o grafo usando a busca em profundidade iterativa e gera um arquivo 
+ * de texto da árvore geradora.
+ * 
+ * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (0).
+ * 
+ * @param G Grafo a ser percorrido;
+ * @param v Vértice inicial;
+ * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
+ * 
+ * @retval 1 - Arquivo de saída gerado com sucesso;
+ * @retval 0 - Erro na geração do arquivo de saída.
+ */
+int mg_iterativeDfs(M_Graph G, vertex v, char *path);
 
 /**
  * @brief matrix_graph: Calcula a distância entre dois vértices utilizando BFS.

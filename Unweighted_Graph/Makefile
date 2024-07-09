@@ -10,6 +10,7 @@ all: lib main
 
 lib: 	$(BIN)/List.o 		\
 		$(BIN)/Queue.o		\
+		$(BIN)/Stack.o		\
 		$(BIN)/Graph.o
 	ar -rcs $(LIB)/libGraph.a $(BIN)/*.o
 
