@@ -5,6 +5,7 @@
 #include "../include/Graph.h"
 #include "../include/List.h"
 #include "../include/Queue.h"
+#include "../include/Stack.h"
 
 clock_t clock_begin = 0;
 clock_t clock_end = 0;
@@ -226,7 +227,7 @@ static void lg_dfs_visit(L_Graph G, vertex v, Vertex_info vertexes[])
     {
         w = head->w;
         if (vertexes[w].color == 'W')
-        {
+        {         
             vertexes[w].father = v;
             vertexes[w].depth = vertexes[v].depth + 1;
             lg_dfs_visit(G, w, vertexes);
@@ -329,6 +330,8 @@ L_Graph lg_makeGraph(int V)
 
 void lg_destroyGraph(L_Graph *G)
 {
+    if(*G == NULL)
+        return;
     vertex v;
     for(v = 0; v < (*G)->V; v++)
         l_destroyList(&(*G)->adj[v]);
@@ -350,9 +353,11 @@ int lg_insertEdge(L_Graph G, vertex v, vertex u)
 
 int lg_removeEdge(L_Graph G, vertex v, vertex u)
 {
-    v--;u--;
-    l_remove(G->adj[v], u);
+    v--; u--;
+    if(!l_remove(G->adj[v], u))
+        return 0;
     l_remove(G->adj[u], v);
+    G->E--;
     return 0;
 }
 
@@ -360,6 +365,16 @@ int lg_getEdge(L_Graph G,vertex v, vertex u)
 {
     v--; u--;
     return l_find(G->adj[v], u);
+}
+
+int lg_getNumOfVertexes(L_Graph G)
+{
+    return G->V;
+}
+
+int lg_getNumOfEdges(L_Graph G)
+{
+    return G->E;
 }
 
 void lg_show(L_Graph G)
@@ -375,7 +390,7 @@ void lg_show(L_Graph G)
 
 int lg_outputFile(L_Graph G, char *path)
 {
-    // Cria/substitui um arquivo texto chamado "saida.txt" no caminho indicado.
+    // Cria ou substitui um arquivo texto chamado "saida.txt" no caminho indicado.
     FILE *f = fopen(path, "w");
     if(!f)
         return 0;
@@ -442,7 +457,7 @@ int lg_bfs(L_Graph G, vertex v, char *path)
     return 1;
 }
 
-int lg_dfs(L_Graph G, vertex v, char *path)
+int lg_recursiveDfs(L_Graph G, vertex v, char *path)
 {
     v--; // Ajustando o vértice para ser base 0
     Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
@@ -469,13 +484,83 @@ int lg_dfs(L_Graph G, vertex v, char *path)
         free(vertexes);
         return 0;
     }
-        
     for (w = 0; w < G->V; w++)
     {
         if(vertexes[w].color == 'B')
             fprintf(f, "vertex=%u\tfather=%d\tdepth=%d\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
     }
+    fclose(f);
+    free(vertexes);
+    return 1;
+}
 
+int lg_iterativeDfs(L_Graph G, vertex v, char *path)
+{
+    v--;
+    Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
+    if(vertexes == NULL)
+        exit(EXIT_FAILURE);
+    vertex u, w;
+    for(w = 0; w < G->V; w++)
+    {
+        vertexes[w].color = 'W';
+        vertexes[w].depth = 0;
+        vertexes[w].father = -1;
+    }
+
+    Stack S = s_initStack();
+
+    vertexes[v].color = 'G';
+    s_push(S, v);
+    Node head;
+    while(!s_isEmpty(S))
+    {
+        u = s_top(S);
+        head = G->adj[u]->head; // Acessa a lista de adjacência do vértice u
+        while (1)
+        {
+            if(head == NULL)
+            {
+                vertexes[u].color = 'B';
+                s_pop(S);
+                break;
+            }
+            w = head->w;
+            if (vertexes[w].color == 'W')
+            {
+                vertexes[w].color = 'G';
+                vertexes[w].father = u;
+                vertexes[w].depth = vertexes[u].depth + 1;
+                s_push(S, w);
+                break;
+            }
+            else
+            {
+                if(head->next == NULL)
+                {
+                    vertexes[u].color = 'B';
+                    s_pop(S);
+                    break;
+                }
+                else
+                    head = head->next;
+            }
+        }
+    }
+    s_destroyStack(&S);
+
+    // Escrevendo a saída no arquivo
+    FILE *f = fopen(path, "w");
+    if (!f)
+    {
+        free(vertexes);
+        return 0;
+    }
+    for (w = 0; w < G->V; w++)
+    {
+        if(vertexes[w].color == 'B')
+            fprintf(f, "vertex=%u\tfather=%d\tdepth=%d\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
+    }
     fclose(f);
     free(vertexes);
     return 1;
@@ -594,6 +679,7 @@ int lg_aprroximateDiameter(L_Graph G)
     return aprroximateDiameter;
 }
 
+//TODO: RETORNAR NULO
 l_ConnectedComponents lg_connectedComponents(L_Graph G)
 {
     l_ConnectedComponents lc = allocLCC();
@@ -837,6 +923,16 @@ int mg_getEdge(M_Graph G,vertex v, vertex u)
     return G->adj[v-1][u-1];
 }
 
+int mg_getNumOfVertexes(M_Graph G)
+{
+    return G->V;
+}
+
+int mg_getNumOfEdges(M_Graph G)
+{
+    return G->E;
+}
+
 void mg_show(M_Graph G)
 {
     vertex i, j;
@@ -922,7 +1018,7 @@ int mg_bfs(M_Graph G, vertex v, char *path)
     return 1;
 }
 
-int mg_dfs(M_Graph G, vertex v, char *path)
+int mg_recursiveDfs(M_Graph G, vertex v, char *path)
 {
     v--;
     Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
@@ -954,6 +1050,11 @@ int mg_dfs(M_Graph G, vertex v, char *path)
     fclose(f);
     free(vertexes);
     return 1;
+}
+
+int mg_iterativeDfs(M_Graph G, vertex v, char *path)
+{
+
 }
 
 int mg_distance(M_Graph G, vertex v, vertex u)
@@ -1060,6 +1161,7 @@ int mg_aprroximateDiameter(M_Graph G)
     return diameter;
 }
 
+//TODO: RETORNAR NULO
 l_ConnectedComponents mg_connectedComponents(M_Graph G)
 {
     l_ConnectedComponents lcc = allocLCC(); // Lista de componentes conexos
@@ -1097,7 +1199,7 @@ int cc_getNumOfCComponents(l_ConnectedComponents lcc)
 
 int cc_getSizeCComponent(l_ConnectedComponents l, int id)
 {
-    return l_getSize(l->list[id].vertexes);
+    return l_getSize(l->list[id-1].vertexes);
 }
 
 void cc_listCComponents(l_ConnectedComponents lcc)
@@ -1113,10 +1215,10 @@ void cc_listCComponents(l_ConnectedComponents lcc)
 
 void cc_showCComponent(l_ConnectedComponents lcc, int id)
 {
-    printf("\n~ Componente [%d]:\n", lcc->list[id].id);
+    printf("\n~ Componente [%d]:\n", lcc->list[id-1].id);
     printf("      - Qnt. de vértices: %d\n", cc_getSizeCComponent(lcc, id));
     printf("      - Vértices pertencentes:\n         ");
-    l_show(lcc->list[id].vertexes);
+    l_show(lcc->list[id-1].vertexes);
 }
 
 void cc_destroyCComponents(l_ConnectedComponents *lcc)

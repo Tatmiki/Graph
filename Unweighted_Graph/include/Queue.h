@@ -20,7 +20,7 @@ typedef struct queue *Queue;
 /**
  * @brief Aloca e inicializa uma fila dinâmica.
  * 
- * @warning Lembre-se de desalocar a fila apoós o uso com a função q_destroyQueue().
+ * @warning Lembre-se de desalocar a fila após o uso com a função q_destroyQueue().
  * @see q_destroyQueue
  * 
  * @retval Queue - Fila alocada e inicializada.
@@ -70,7 +70,7 @@ int q_front(Queue q);
 /**
  * @brief Verifica se a fila está vazia.
  * 
- * @param q FIla em questão.
+ * @param q Fila em questão.
  * 
  * @retval 1 - A fila está vazia;
  * @retval 0 - A fila NÃO está vazia.
