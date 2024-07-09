@@ -233,10 +233,10 @@ int main()
                     cc_listCComponents(lcc);
                     printf("\nInforme o id do componente para exibi-lo(Ids informados acima): ");
                     scanf("%d", &id);
-                    cc_showCComponent(lcc, id-1);
+                    cc_showCComponent(lcc, id);
                     printf("\nInforme o id do componente para saber o seu tamanho(Ids informados acima): ");
                     scanf("%d", &id);
-                    printf("%d",cc_getSizeCComponent(lcc, id-1));
+                    printf("%d",cc_getSizeCComponent(lcc, id));
                 }
                 else
                     printf("ERRO na criação da lista de componentes conexos...");
