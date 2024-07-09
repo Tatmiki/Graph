@@ -1,30 +1,7 @@
-#pragma GCC diagnostic ignored "-Wunused-result"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "../include/Graph.h"
 
-/*
-    Criar grafo
-    Criar grafo de um arquivo de texto
-    Inserir aresta
-    Remover aresta
-    Arquivo de saída de inforamções do grafo
-    BFS com arquivo de saída
-    DFS com arquivo de saída
-    Distância entre dois vértices
-    Excentricidade de um vértice
-    Diametro absoluto
-    Diametro aproximado
-    Gerar lista de componentes conexos
-    **as funções abaixo dependem da geração da lista de cc, se a lista for vazia elas não podem ser feitas**
-    Quantidade de componentes conexos do grafo
-    Listagem dos componentes
-    Exibição de um componente específico
-    Tamanho de um componente específico
-    
-    *NÃO ESQUECER DE DESTRUIR AS ESTRUTURAS ANTES DO FECHAMENTO DO PROGRAMA
-*/
 int main()
 {
     //case 1
