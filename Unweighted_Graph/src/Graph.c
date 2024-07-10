@@ -285,7 +285,8 @@ static vertex lg_bfs_distances(L_Graph G, vertex v, Vertex_info vertexes[])
 
 unsigned long long lg_representationSize(unsigned long long V, unsigned long long E)
 {
-    // custo da estrutura + custo do vetor de ponteiros de lista + custo da estrutura de lista + custo dos nós de adjacências (2x pois é u-v e v-u)
+    // custo da estrutura + custo do vetor de ponteiros de lista 
+    // + custo da estrutura de lista + custo dos nós de adjacências (2x pois é u-v e v-u)
     return sizeof(struct l_graph) + V * sizeof(struct list*) + V * sizeof(struct list) + (E * 2) * sizeof(struct node);
 }
 
