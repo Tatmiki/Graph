@@ -283,10 +283,10 @@ static vertex lg_bfs_distances(L_Graph G, vertex v, Vertex_info vertexes[])
     return u;
 }
 
-unsigned long long lg_representationSize(int V, int E)
+unsigned long long lg_representationSize(unsigned long long V, unsigned long long E)
 {
-    // custo da estrutura + custo do vetor de lista + custo dos nós de adjacências
-    return sizeof(struct l_graph) + V * sizeof(struct list) + (E * 2) * sizeof(struct node);
+    // custo da estrutura + custo do vetor de ponteiros de lista + custo da estrutura de lista + custo dos nós de adjacências (2x pois é u-v e v-u)
+    return sizeof(struct l_graph) + V * sizeof(struct list*) + V * sizeof(struct list) + (E * 2) * sizeof(struct node);
 }
 
 L_Graph lg_makeGraphFromFile(char *path)
@@ -465,12 +465,11 @@ int lg_recursiveDfs(L_Graph G, vertex v, char *path)
 {
     v--; // Ajustando o vértice para ser base 0
     Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
-    vertex w;
-
     if(vertexes == NULL)
-        exit(EXIT_FAILURE);
+        return 0;
 
     // Inicializando as estruturas de dados
+    vertex w;
     for (w = 0; w < G->V; w++)
     {
         vertexes[w].color = 'W';  // Todos os vértices são inicialmente não visitados
@@ -478,7 +477,7 @@ int lg_recursiveDfs(L_Graph G, vertex v, char *path)
         vertexes[w].father = -1;  // Inicialmente nenhum vértice tem pai definido
     }
 
-    // Chamando a DFS para cada vértice não visitado
+    // Chamando a DFS
     lg_dfs_visit(G, v, vertexes);
 
     // Escrevendo a saída no arquivo
@@ -774,23 +773,23 @@ static void freeMatrix(int **matrix, int n)
  * @param u Vértice inicial da busca.
  * @param vertexes Vetor que armazenará os dados da busca.
  */
-static void mg_dfs_visit(M_Graph G, vertex u, Vertex_info vertexes[])
+static void mg_dfs_visit(M_Graph G, vertex v, Vertex_info vertexes[])
 {
-    vertexes[u].color = 'G';
-    vertex v;
-    for(v = 0; v < G->V; v++)
+    vertexes[v].color = 'G';
+    vertex w;
+    for(w = 0; w < G->V; w++)
     {
-        if(G->adj[u][v] == 1)
+        if(G->adj[v][w] == 1)
         {
-            if(vertexes[v].color == 'W')
+            if(vertexes[w].color == 'W')
             {
-                vertexes[v].father = u;
-                vertexes[v].depth = vertexes[u].depth + 1;
-                mg_dfs_visit(G, v, vertexes);
+                vertexes[w].father = v;
+                vertexes[w].depth = vertexes[v].depth + 1;
+                mg_dfs_visit(G, w, vertexes);
             }
         }
     }
-    vertexes[u].color = 'B';
+    vertexes[v].color = 'B';
 }
 
 /**
@@ -861,7 +860,7 @@ static void mg_dfsCComponents(M_Graph G, vertex u, char visited[], ConnectedComp
     l_insertBeggining(cc->vertexes, u);
 }
 
-unsigned long long mg_representationSize(int V)
+unsigned long long mg_representationSize(unsigned long long V)
 {
     // custo da estrutura + custo da matriz de adjacências
     return sizeof(struct m_graph) + (V * V) * sizeof(int); 
@@ -1038,7 +1037,7 @@ int mg_recursiveDfs(M_Graph G, vertex v, char *path)
     v--;
     Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
     if(vertexes == NULL)
-        exit(EXIT_FAILURE);
+        return 0;
     vertex w;
     for(w = 0; w < G->V; w++)
     {

@@ -61,7 +61,7 @@ typedef struct l_connected_components *l_ConnectedComponents;
  * 
  * @return Valor em bytes da representação.
  */
-unsigned long long lg_representationSize(int V, int E);
+unsigned long long lg_representationSize(unsigned long long V, unsigned long long E);
 
 /**
  * @brief list_graph: Cria um grafo a partir de um arquivo texto de adjacências, contendo 
@@ -298,7 +298,7 @@ l_ConnectedComponents lg_connectedComponents(L_Graph G);
  * 
  * @return Valor em bytes da representação.
  */
-unsigned long long mg_representationSize(int V);
+unsigned long long mg_representationSize(unsigned long long V);
 
 /**
  * @brief matrix_graph: Cria a partir de um arquivo texto de adjacências, contendo 
