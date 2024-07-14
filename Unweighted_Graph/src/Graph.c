@@ -1,15 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
-#include <time.h>
 #include "../include/Graph.h"
 #include "../include/List.h"
 #include "../include/Queue.h"
 #include "../include/Stack.h"
-
-clock_t clock_begin = 0;
-clock_t clock_end = 0;
-double time_lapsed = 0;
 
 /**
  * @brief Estrutura do grafo com representação em lista de ajacência.
@@ -59,7 +54,7 @@ struct l_connected_components
     int size;                   /*> Tamanho da lista.               */
 };
 
-//----------------------------------------------------------------------------------
+// static_functions----------------------------------------------------------------------------------
 
 /**
  * @brief Troca o valor de duas variáveis inteiras
@@ -107,10 +102,13 @@ static l_ConnectedComponents allocLCC()
 {
     l_ConnectedComponents lc = (l_ConnectedComponents) malloc(sizeof(struct l_connected_components));
     if(lc == NULL)
-        exit(EXIT_FAILURE);
+        return NULL;
     lc->list = (ConnectedComponent*) malloc(sizeof(ConnectedComponent) * 10);
     if(lc->list == NULL)
-        exit(EXIT_FAILURE);
+    {
+        free(lc);
+        return NULL;
+    }
     lc->size = 10;
     return lc;
 }
@@ -121,12 +119,13 @@ static l_ConnectedComponents allocLCC()
  * @param lc Lista em questão;
  * @param newSize Novo tamanho da lista.
  */
-static void reallocLCC(l_ConnectedComponents lc, int newSize)
+static int reallocLCC(l_ConnectedComponents lc, int newSize)
 {
     lc->list = (ConnectedComponent*) realloc(lc->list, sizeof(ConnectedComponent) * newSize);
     if(lc->list == NULL)
-        exit(EXIT_FAILURE);
+        return 0;
     lc->size = newSize;
+    return 1;
 }
 
 /**
@@ -168,8 +167,7 @@ static void quicksortLCC(ConnectedComponent vet[], const int start, const int en
     if(left < end) quicksortLCC(vet, left, end); // ramo direito
 }
 
-
-//----------------------------------------------------------------------------------
+// list_graph----------------------------------------------------------------------------------
 
 /**
  * @brief Realiza a BFS para identificar um componente conexo de um grafo marcando todos os vértices alcançáveis
@@ -285,6 +283,13 @@ static vertex lg_bfs_distances(L_Graph G, vertex v, Vertex_info vertexes[])
     return u;
 }
 
+unsigned long long lg_representationSize(unsigned long long V, unsigned long long E)
+{
+    // custo da estrutura + custo do vetor de ponteiros de lista 
+    // + custo da estrutura de lista + custo dos nós de adjacências (2x pois é u-v e v-u)
+    return sizeof(struct l_graph) + V * sizeof(struct list*) + V * sizeof(struct list) + (E * 2) * sizeof(struct node);
+}
+
 L_Graph lg_makeGraphFromFile(char *path)
 {
     FILE *f = fopen(path, "r");
@@ -314,7 +319,7 @@ L_Graph lg_makeGraph(int V)
     L_Graph G = (L_Graph) malloc(sizeof(struct l_graph));
     if(G == NULL)
         return NULL;
-    G->V = (int) V;
+    G->V = V;
     G->E = 0;
     G->adj = (List*) malloc(sizeof(struct list) * V); // aloca um vetor de listas
     if(G->adj == NULL)
@@ -461,12 +466,11 @@ int lg_recursiveDfs(L_Graph G, vertex v, char *path)
 {
     v--; // Ajustando o vértice para ser base 0
     Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
-    vertex w;
-
     if(vertexes == NULL)
-        exit(EXIT_FAILURE);
+        return 0;
 
     // Inicializando as estruturas de dados
+    vertex w;
     for (w = 0; w < G->V; w++)
     {
         vertexes[w].color = 'W';  // Todos os vértices são inicialmente não visitados
@@ -474,7 +478,7 @@ int lg_recursiveDfs(L_Graph G, vertex v, char *path)
         vertexes[w].father = -1;  // Inicialmente nenhum vértice tem pai definido
     }
 
-    // Chamando a DFS para cada vértice não visitado
+    // Chamando a DFS
     lg_dfs_visit(G, v, vertexes);
 
     // Escrevendo a saída no arquivo
@@ -496,6 +500,15 @@ int lg_recursiveDfs(L_Graph G, vertex v, char *path)
 
 int lg_iterativeDfs(L_Graph G, vertex v, char *path)
 {
+    /*
+        Problema dessa implementação comparado a recursiva:
+            - A volta da recursão garante que as adjacências já verificadas
+            antes de chamar a recursão não serão vistas novamente (função
+            continua de onde parou), enquanto nessa implementação sempre que 
+            desempilhamos um vértice e vamos para o anterior, este mesmo 
+            analisa todas as adjacências novamente, mesmo as já analisadas 
+            antes de ser empilhado.
+    */
     v--;
     Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
     if(vertexes == NULL)
@@ -535,16 +548,7 @@ int lg_iterativeDfs(L_Graph G, vertex v, char *path)
                 break;
             }
             else
-            {
-                if(head->next == NULL)
-                {
-                    vertexes[u].color = 'B';
-                    s_pop(S);
-                    break;
-                }
-                else
-                    head = head->next;
-            }
+                head = head->next;
         }
     }
     s_destroyStack(&S);
@@ -679,14 +683,18 @@ int lg_aprroximateDiameter(L_Graph G)
     return aprroximateDiameter;
 }
 
-//TODO: RETORNAR NULO
 l_ConnectedComponents lg_connectedComponents(L_Graph G)
 {
     l_ConnectedComponents lc = allocLCC();
+    if(lc == NULL)
+        return NULL;
     vertex v;
     char *vertexes = (char*) malloc(G->V);
     if(vertexes == NULL)
-        exit(EXIT_FAILURE);
+    {
+        cc_destroyCComponents(&lc);
+        return NULL;
+    }
     int id = 0;
     for(v = 0; v < G->V; v++)
         vertexes[v] = 'W';
@@ -703,12 +711,13 @@ l_ConnectedComponents lg_connectedComponents(L_Graph G)
     }
     free(vertexes);
     if(id != lc->size)
-        reallocLCC(lc, id);
+        if(!reallocLCC(lc, id))
+            return NULL;
     quicksortLCC(lc->list, 0, lc->size - 1);
     return lc;
 }
 
-//----------------------------------------------------------------------------------
+// matrix_graph----------------------------------------------------------------------------------
 
 /**
  * @brief Função para alocar e retornar uma matriz de inteiros.
@@ -765,23 +774,23 @@ static void freeMatrix(int **matrix, int n)
  * @param u Vértice inicial da busca.
  * @param vertexes Vetor que armazenará os dados da busca.
  */
-static void mg_dfs_visit(M_Graph G, vertex u, Vertex_info vertexes[])
+static void mg_dfs_visit(M_Graph G, vertex v, Vertex_info vertexes[])
 {
-    vertexes[u].color = 'G';
-    vertex v;
-    for(v = 0; v < G->V; v++)
+    vertexes[v].color = 'G';
+    vertex w;
+    for(w = 0; w < G->V; w++)
     {
-        if(G->adj[u][v] == 1)
+        if(G->adj[v][w] == 1)
         {
-            if(vertexes[v].color == 'W')
+            if(vertexes[w].color == 'W')
             {
-                vertexes[v].father = u;
-                vertexes[v].depth = vertexes[u].depth + 1;
-                mg_dfs_visit(G, v, vertexes);
+                vertexes[w].father = v;
+                vertexes[w].depth = vertexes[v].depth + 1;
+                mg_dfs_visit(G, w, vertexes);
             }
         }
     }
-    vertexes[u].color = 'B';
+    vertexes[v].color = 'B';
 }
 
 /**
@@ -850,6 +859,12 @@ static void mg_dfsCComponents(M_Graph G, vertex u, char visited[], ConnectedComp
     visited[u] = 'B';
     cc->id = id;
     l_insertBeggining(cc->vertexes, u);
+}
+
+unsigned long long mg_representationSize(unsigned long long V)
+{
+    // custo da estrutura + custo da matriz de adjacências
+    return sizeof(struct m_graph) + (V * V) * sizeof(int); 
 }
 
 M_Graph mg_makeGraphFromFile(char *path)
@@ -1023,7 +1038,7 @@ int mg_recursiveDfs(M_Graph G, vertex v, char *path)
     v--;
     Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
     if(vertexes == NULL)
-        exit(EXIT_FAILURE);
+        return 0;
     vertex w;
     for(w = 0; w < G->V; w++)
     {
@@ -1054,7 +1069,71 @@ int mg_recursiveDfs(M_Graph G, vertex v, char *path)
 
 int mg_iterativeDfs(M_Graph G, vertex v, char *path)
 {
+    /*
+        Problema dessa implementação comparado a recursiva:
+            - A volta da recursão garante que as adjacências já verificadas
+            antes de chamar a recursão não serão vistas novamente (função
+            continua de onde parou), enquanto nessa implementação sempre que 
+            desempilhamos um vértice e vamos para o anterior, este mesmo 
+            analisa todas as adjacências novamente, mesmo as já analisadas 
+            antes de ser empilhado.
+    */
+    v--;
+    Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
+    if(vertexes == NULL)
+        exit(EXIT_FAILURE);
+    vertex u, w;
+    for(w = 0; w < G->V; w++)
+    {
+        vertexes[w].color = 'W';
+        vertexes[w].depth = 0;
+        vertexes[w].father = -1;
+    }
 
+    Stack S = s_initStack();
+
+    vertexes[v].color = 'G';
+    s_push(S, v);
+    while(!s_isEmpty(S))
+    {
+        u = s_top(S);
+        for(w = 0; w < G->V; w++)
+        {
+            if(G->adj[u][w] == 1)
+            {
+                if (vertexes[w].color == 'W')
+                {
+                    vertexes[w].color = 'G';
+                    vertexes[w].father = u;
+                    vertexes[w].depth = vertexes[u].depth + 1;
+                    s_push(S, w);
+                    break;
+                }
+            }
+        }
+        if(w == G->V)
+        {
+            vertexes[u].color = 'B';
+            s_pop(S);
+        }
+    }
+    s_destroyStack(&S);
+
+    // Escrevendo a saída no arquivo
+    FILE *f = fopen(path, "w");
+    if (!f)
+    {
+        free(vertexes);
+        return 0;
+    }
+    for (w = 0; w < G->V; w++)
+    {
+        if(vertexes[w].color == 'B')
+            fprintf(f, "vertex=%u\tfather=%d\tdepth=%d\n", w + 1, vertexes[w].father + 1, vertexes[w].depth);
+    }
+    fclose(f);
+    free(vertexes);
+    return 1;
 }
 
 int mg_distance(M_Graph G, vertex v, vertex u)
@@ -1161,14 +1240,18 @@ int mg_aprroximateDiameter(M_Graph G)
     return diameter;
 }
 
-//TODO: RETORNAR NULO
 l_ConnectedComponents mg_connectedComponents(M_Graph G)
 {
     l_ConnectedComponents lcc = allocLCC(); // Lista de componentes conexos
+    if(lcc == NULL)
+        return NULL;
     int id = 0; // Índice de acesso aos componentes conexos da lista e identificador de cada componente
     char *visited = (char*) malloc(G->V); // Salva o estado de visitado ou não de um vértice na dfs
     if(visited == NULL)
-        exit(EXIT_FAILURE);
+    {
+        cc_destroyCComponents(&lcc);
+        return NULL;
+    }
     vertex v;
     for(v = 0; v < G->V; v++)
         visited[v] = 'W'; // inicializa todos como branco (não visitado)
@@ -1185,12 +1268,13 @@ l_ConnectedComponents mg_connectedComponents(M_Graph G)
     }
     free(visited);
     if(lcc->size != id)
-        reallocLCC(lcc, id); // reajusta o tamanho alocado da lista para o utilizado
+        if(!reallocLCC(lcc, id)) // reajusta o tamanho alocado da lista para o utilizado
+            return NULL; 
     quicksortLCC(lcc->list, 0, lcc->size-1); // ordena os componentes em ordem decrescente
     return lcc;
 }
 
-//----------------------------------------------------------------------------------
+// connected_components----------------------------------------------------------------------------------
 
 int cc_getNumOfCComponents(l_ConnectedComponents lcc)
 {
