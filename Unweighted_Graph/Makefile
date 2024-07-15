@@ -22,7 +22,8 @@ lib: 	$(BIN)/List.o 		\
 		$(BIN)/GraphUtil.o	\
 		$(BIN)/CCUtil.o		\
 		$(BIN)/L_Graph.o	\
-		$(BIN)/M_Graph.o
+		$(BIN)/M_Graph.o	\
+		$(BIN)/MW_Graph.o
 	ar -rcs $(LIB)/libGraph.a $(BIN)/*.o
 
 main: $(SRC)/main.c $(SRC)/main2.c
@@ -41,3 +42,6 @@ $(BIN)/%.o: $(SRC)/%.c
 
 clear:
 	rm $(BIN)/* $(TESTS)/* $(LIB)/*
+
+cls:
+	del /Q "$(BIN)\*" "$(TESTS)\*" "$(LIB)\*"
