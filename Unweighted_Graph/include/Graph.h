@@ -42,6 +42,20 @@ typedef struct l_graph *L_Graph;
 typedef struct m_graph *M_Graph;
 
 /**
+ * @brief Definição da estrutura do grafo ponderado com representação em lista de 
+ * adjacências. Os índices de um grafo criado são acessados de 1 a N, sendo N o 
+ * último vértice do grafo.
+ */
+typedef struct m_graph *LW_Graph;
+
+/**
+ * @brief Definição da estrutura do grafo ponderado com representação em matriz de 
+ * adjacências. Os índices de um grafo criado são acessados de 1 a N, sendo N o 
+ * último vértice do grafo.
+ */
+typedef struct m_graph *MW_Graph;
+
+/**
  * @brief Estrutura de lista de componentes conexos. Utilizada para extrair as informações 
  * dos componentes conexos de um grafo.
  */
@@ -82,7 +96,7 @@ L_Graph lg_makeGraphFromFile(char *path);
  * 
  * @param V Número de vértices iniciais do grafo.
  * 
- * @retval L_Graph* - Pontereito para um grafo de lista de adjacências alocado;
+ * @retval L_Graph - Pontereito para um grafo de lista de adjacências alocado;
  * @retval NULL - Ponteiro nulo caso haja erro na alocação.
  */
 L_Graph lg_makeGraph(int V);
@@ -301,12 +315,12 @@ l_ConnectedComponents lg_connectedComponents(L_Graph G);
 unsigned long long mg_representationSize(unsigned long long V);
 
 /**
- * @brief matrix_graph: Cria a partir de um arquivo texto de adjacências, contendo 
+ * @brief matrix_graph: Cria um grafo a partir de um arquivo texto de adjacências, contendo 
  * em sua primeira linha o número de vértices e as seguintes as adjacências.
  * 
  * @param path Caminho para o arquivo texto (completo ou em relação ao ambiente de execução).
  * 
- * @retval M_Graph* - Ponteiro para o grafo criado;
+ * @retval M_Graph - Ponteiro para o grafo criado;
  * @retval NULL - Ponteiro nulo indicando erro na criação por falha no arquivo ou na alocação.
  */
 M_Graph mg_makeGraphFromFile(char *path);
@@ -330,7 +344,7 @@ M_Graph mg_makeGraph(int V);
  * @warning Sempre use essa função após o término do uso do grafo alocado na função mg_makeGraph()!
  * @see mg_makeGraph
  * 
- * @param M_Graph Endereço do grafo a ser desalocado.
+ * @param G Endereço do grafo a ser desalocado.
  */
 void mg_destroyGraph(M_Graph *G);
 
@@ -518,6 +532,223 @@ int mg_aprroximateDiameter(M_Graph G);
  * @retval l_ConnectedComponents - Lista de componentes conectados e suas informações.
  */
 l_ConnectedComponents mg_connectedComponents(M_Graph G);
+
+//----------------------------------------------------------------------------------
+
+/**
+ * @brief list_wighted_graph: Retorna o tamanho em bytes da representação de um grafo ponderado de V vértices 
+ * e E arestas com lista de adjacências.
+ * 
+ * @param V Quantidade de vértices que seriam representados;
+ * @param E Quantidade de arestas que seriam representadas.
+ * 
+ * @return Valor em bytes da representação.
+ */
+unsigned long long lwg_representationSize(unsigned long long V, unsigned long long E);
+
+/**
+ * @brief list_wighted_graph: Cria um grafo ponderado a partir de um arquivo texto de adjacências, contendo 
+ * em sua primeira linha o número de vértices e as seguintes as adjacências com os pesos.
+ *
+ * @param path Caminho para o arquivo texto (completo ou em relação ao ambiente de execução).
+ * 
+ * @retval LW_Graph - Ponteiro para o grafo criado;
+ * @retval NULL - Ponteiro nulo indicando erro na criação por falha no arquivo ou na alocação.
+ */
+LW_Graph lwg_makeGraphFromFile(char *path);
+
+/**
+ * @brief list_wighted_graph: Cria um grafo ponderado de lista de adjacências.
+ * 
+ * @warning Não deixe de armazenar o retorno da função e use a função lg_destroyGraph() ao término do uso do grafo alocado.
+ * @see lwg_destroyGraph
+ * 
+ * @param V Número de vértices iniciais do grafo.
+ * 
+ * @retval LW_Graph - Pontereito para um grafo de lista de adjacências alocado;
+ * @retval NULL - Ponteiro nulo caso haja erro na alocação.
+ */
+LW_Graph lwg_makeGraph(int V);
+
+/**
+ * @brief list_wighted_graph: Desaloca a memória alocada de um grafo de lista de adjacências e configura seu ponteiro para nulo.
+ * 
+ * @warning Sempre use essa função após o término do uso do grafo alocado na função lwg_makeGraph()!
+ * @see lwg_makeGraph
+ * 
+ * @param G Endereço do grafo a ser desalocado.
+ */
+void lwg_destroyGraph(LW_Graph *G);
+
+/**
+ * @brief list_wighted_graph: Insere uma aresta no grafo G, ligando os vértices v e u e atribuindo um peso a essa aresta.
+ * Não é admitido arestas múltiplas.
+ * 
+ * @param G Grafo em que a aresta será inserida;
+ * @param v Vértice v de origem/entrada;
+ * @param u Vértice u de origem/entrada;
+ * @param w Peso da aresta.
+ * 
+ * @retval 1 - para inserção bem-sucedida;
+ * @retval 0 - caso a aresta já exista ou algum parâmetro seja incoerente.
+ */
+int lwg_insertEdge(LW_Graph G, vertex v, vertex u, double w);
+
+/**
+ * @brief list_wighted_graph: Remove uma aresta do grafo G entre os vértices v e u.
+ * 
+ * @param G Grafo em questão.
+ * @param v Vértice v de origem/destino;
+ * @param u Vértice u de origem/destino.
+ * 
+ * @retval 1 - se a remoção foi bem-sucedida;
+ * @retval 0 - caso a aresta não exista ou algum parâmetro seja incoerente.
+ */
+int lwg_removeEdge(LW_Graph G, vertex v, vertex u);
+
+/**
+ * @brief list_wighted_graph: Verifica a existência de uma aresta entre os vértices v e u.
+ * 
+ * @param G Grafo a ser considerado;
+ * @param v Vértice v de origem/destino;
+ * @param u Vértice u de origem/destino.
+ * 
+ * @retval int - Retorna o peso da aresta u - v; 
+ * @retval 0 - NÃO existe uma aresta entre u e v.
+ */
+int lwg_getEdge(LW_Graph G, vertex v, vertex u);
+
+/**
+ * @brief list_wighted_graph: Retorna o número de vértices do grafo.
+ * 
+ * @param G Grafo em questão.
+ * 
+ * @return int - Número de vértices do grafo.
+ */
+int lwg_getNumOfVertexes(LW_Graph G);
+
+/**
+ * @brief list_wighted_graph: Retorna o número de arestas do grafo.
+ * 
+ * @param G Grafo em questão.
+ * @return int - Número de arestas do grafo.
+ */
+int lwg_getNumOfEdges(LW_Graph G);
+
+/**
+ * @brief list_wighted_graph: Exibe o grafo de lista de adjacências.
+ * 
+ * @param G Grafo a ser exibido 
+ */
+void lwg_show(LW_Graph G);
+
+//----------------------------------------------------------------------------------
+
+/**
+ * @brief matrix_weighted_graph: Retorna o tamanho em bytes da representação de um grafo 
+ * de V vértices com matriz de adjacências.
+ * 
+ * @param V Quantidade de vértices que seriam representados.
+ * 
+ * @return Valor em bytes da representação.
+ */
+unsigned long long mwg_representationSize(unsigned long long V);
+
+/**
+ * @brief matrix_weighted_graph: Cria um grafo ponderado a partir de um arquivo texto de adjacências, 
+ * contendo em sua primeira linha o número de vértices e as seguintes as adjacências com os pesos.
+ * 
+ * @param path Caminho para o arquivo texto (completo ou em relação ao ambiente de execução).
+ * 
+ * @retval MW_Graph - Ponteiro para o grafo criado;
+ * @retval NULL - Ponteiro nulo indicando erro na criação por falha no arquivo ou na alocação.
+ */
+MW_Graph mwg_makeGraphFromFile(char *path);
+
+/**
+ * @brief matrix_weighted_graph: Cria um grafo ponderado de matriz de adjacências.
+ * 
+ * @warning Não deixe de armazenar o retorno da função e use a função mwg_destroyGraph() ao término do uso do grafo alocado.
+ * @see mwg_destroyGraph
+ * 
+ * @param V Número de vértices iniciais do grafo.
+ * 
+ * @retval MW_Graph - Ponteiro para um grafo alocado;
+ * @retval NULL - Ponteiro nulo caso haja erro na alocação.
+ */
+MW_Graph mwg_makeGraph(int V);
+
+/**
+ * @brief matrix_weighted_graph: Desaloca a memória alocada de um grafo de matriz de adjacências 
+ * e configura seu ponteiro para nulo.
+ * 
+ * @warning Sempre use essa função após o término do uso do grafo alocado na função mg_makeGraph()!
+ * @see mwg_makeGraph
+ * 
+ * @param G Endereço do grafo a ser desalocado.
+ */
+void mwg_destroyGraph(MW_Graph *G);
+
+/**
+ * @brief matrix_graph: Insere uma aresta no grafo G, ligando os vértices v e u. Não admite arestas múltiplas.
+ * 
+ * @param G Grafo em que será inserido a aresta;
+ * @param v Vértice v de origem/destino;
+ * @param u Vértice u de origem/destino;
+ * @param w Peso da aresta.
+ * 
+ * @retval 1 - Inserção bem-sucedida;
+ * @retval 0 - Caso a aresta já exista ou algum parâmetro seja incoerente.
+ */
+int mwg_insertEdge(MW_Graph G, vertex v, vertex u, float w);
+
+/** 
+ * @brief matrix_weighted_graph: Remove uma aresta no grafo G entre os vértices v e u.
+ * 
+ * @param G Grafo em questão;
+ * @param v Vértice v de origem/destino;
+ * @param u Vértice u de origem/destino.
+ * 
+ * @retval 1 - Remoção bem-sucedida;
+ * @retval 0 - Caso a aresta não exista ou algum parâmetro seja incoerente.
+ */
+int mwwg_removeEdge(MW_Graph G, vertex v, vertex u);
+
+/**
+ * @brief matrix_weighted_graph: Verifica a existência de uma aresta entre os vértices v e u.
+ * 
+ * @param G Grafo em questão;
+ * @param v Vértice de origem/destino;
+ * @param u Vértice de origem/destino.
+ * 
+ * @retval 1 - Peso da aresta u - v; 
+ * @retval 0 - NÃO existe uma aresta entre u e v.
+ */
+int mwg_getEdge(MW_Graph G, vertex v, vertex u);
+
+/**
+ * @brief matrix_weighted_graph: Retorna o número de vértices do grafo.
+ * 
+ * @param G Grafo em questão.
+ * 
+ * @return int - Número de vértices do grafo.
+ */
+int mwg_getNumOfVertexes(MW_Graph G);
+
+/**
+ * @brief matrix_weighted_graph: Retorna o número de arestas do grafo.
+ * 
+ * @param G Grafo em questão.
+ * @return int - Número de arestas do grafo.
+ */
+int mwg_getNumOfEdges(MW_Graph G);
+
+/**
+ * @brief matrix_weighted_graph: Exibe a matriz de adjacências.
+ * 
+ * @param G Grafo a ser exibido.
+ */
+void mwg_show(MW_Graph G);
 
 //----------------------------------------------------------------------------------
 
