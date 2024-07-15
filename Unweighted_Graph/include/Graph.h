@@ -53,7 +53,7 @@ typedef struct lw_graph *LW_Graph;
  * adjacências. Os índices de um grafo criado são acessados de 1 a N, sendo N o 
  * último vértice do grafo.
  */
-typedef struct m_graph *MW_Graph;
+typedef struct mw_graph *MW_Graph;
 
 /**
  * @brief Estrutura de lista de componentes conexos. Utilizada para extrair as informações 
@@ -724,7 +724,7 @@ int mwwg_removeEdge(MW_Graph G, vertex v, vertex u);
  * @retval 1 - Peso da aresta u - v; 
  * @retval 0 - NÃO existe uma aresta entre u e v.
  */
-int mwg_getEdge(MW_Graph G, vertex v, vertex u);
+float mwg_getEdge(MW_Graph G, vertex v, vertex u);
 
 /**
  * @brief matrix_weighted_graph: Retorna o número de vértices do grafo.
