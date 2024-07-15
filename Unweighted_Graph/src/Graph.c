@@ -5,6 +5,12 @@
 #include "../include/List.h"
 #include "../include/Queue.h"
 #include "../include/Stack.h"
+#include<time.h>
+
+clock_t start_t;
+clock_t end_t;
+clock_t total_t;
+
 
 /**
  * @brief Estrutura do grafo com representação em lista de ajacência.
@@ -217,6 +223,7 @@ static void lg_bfsCComponents(L_Graph G, vertex u, char visited[], ConnectedComp
  */
 static void lg_dfs_visit(L_Graph G, vertex v, Vertex_info vertexes[])
 {
+    start_t = clock();
     vertexes[v].color = 'G';  // Marcando o vértice como visitado
     vertex w;
 
@@ -224,7 +231,7 @@ static void lg_dfs_visit(L_Graph G, vertex v, Vertex_info vertexes[])
     while (head != NULL)
     {
         w = head->w;
-        if (vertexes[w].color == 'W')
+        if (vertexes[w].color == 'W')   
         {         
             vertexes[w].father = v;
             vertexes[w].depth = vertexes[v].depth + 1;
@@ -233,6 +240,8 @@ static void lg_dfs_visit(L_Graph G, vertex v, Vertex_info vertexes[])
         head = head->next;
     }
     vertexes[v].color = 'B';  // Finalizando a visita do vértice
+    end_t = clock();
+    total_t += (end_t - start_t);
 }
 
 /**
@@ -286,7 +295,7 @@ static vertex lg_bfs_distances(L_Graph G, vertex v, Vertex_info vertexes[])
 unsigned long long lg_representationSize(int V, int E)
 {
     // custo da estrutura + custo do vetor de lista + custo dos nós de adjacências
-    return sizeof(struct l_graph) + V * sizeof(struct list) + (E * 2) * sizeof(struct node);
+    return sizeof(struct l_graph) + (V * sizeof(struct list) )+ ((E * 2) * sizeof(struct node)) + V * sizeof(struct list*);
 }
 
 L_Graph lg_makeGraphFromFile(char *path)
@@ -776,6 +785,7 @@ static void freeMatrix(int **matrix, int n)
  */
 static void mg_dfs_visit(M_Graph G, vertex u, Vertex_info vertexes[])
 {
+    start_t = clock();
     vertexes[u].color = 'G';
     vertex v;
     for(v = 0; v < G->V; v++)
@@ -791,6 +801,8 @@ static void mg_dfs_visit(M_Graph G, vertex u, Vertex_info vertexes[])
         }
     }
     vertexes[u].color = 'B';
+    end_t = clock();
+    total_t += (end_t - start_t);
 }
 
 /**
@@ -805,6 +817,7 @@ static void mg_dfs_visit(M_Graph G, vertex u, Vertex_info vertexes[])
  */
 static vertex mg_bfs_distances(M_Graph G, vertex v, Vertex_info vertexes[])
 {
+    start_t = clock();
     vertex w, u = v;
     for(w = 0; w < G->V; w++)
     {
@@ -834,6 +847,8 @@ static vertex mg_bfs_distances(M_Graph G, vertex v, Vertex_info vertexes[])
         vertexes[u].color = 'B';
     }
     q_destroyQueue(&Q);
+    end_t = clack();
+    total_t += (end_t - start_t);
     return u; // Índice relativo ao vetor
 }
 
