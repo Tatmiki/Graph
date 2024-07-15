@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include "../include/Graph.h"
-#include "../include/GraphUtil.h"
+#include "../include/Util.h"
 #include "../include/CCUtil.h"
 #include "../include/List.h"
 #include "../include/Queue.h"

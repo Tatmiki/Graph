@@ -9,7 +9,7 @@
  * 
  */
 
-#include "../include/GraphUtil.h"
+#include "../include/Util.h"
 
 void swap(int* a, int* b)
 {
