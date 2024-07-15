@@ -17,13 +17,15 @@ all: lib tests
 	echo $(TEST_EXECUTABLES)
 
 lib: 	$(BIN)/List.o 		\
+	 	$(BIN)/List_W.o 	\
 		$(BIN)/Queue.o		\
 		$(BIN)/Stack.o		\
 		$(BIN)/GraphUtil.o	\
 		$(BIN)/CCUtil.o		\
 		$(BIN)/L_Graph.o	\
 		$(BIN)/M_Graph.o	\
-		$(BIN)/MW_Graph.o
+		$(BIN)/MW_Graph.o	\
+		$(BIN)/LW_Graph.o
 	ar -rcs $(LIB)/libGraph.a $(BIN)/*.o
 
 main: $(SRC)/main.c $(SRC)/main2.c

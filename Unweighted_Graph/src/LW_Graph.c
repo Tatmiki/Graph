@@ -13,8 +13,6 @@
 #include <stdlib.h>
 #include <limits.h>
 #include "../include/Graph.h"
-#include "../include/GraphUtil.h"
-#include "../include/CCUtil.h"
 #include "../include/List_W.h"
 
 struct lw_graph
@@ -47,7 +45,7 @@ LW_Graph lwg_makeGraphFromFile(char *path)
         fclose(f);
         return NULL;
     }
-    L_Graph G = lwg_makeGraph(V);
+    LW_Graph G = lwg_makeGraph(V);
     if(G == NULL)
     {
         fclose(f);
@@ -61,7 +59,7 @@ LW_Graph lwg_makeGraphFromFile(char *path)
 
 LW_Graph lwg_makeGraph(int V)
 {
-    LW_Graph G = (LW_Graph) malloc(sizeof(struct lw_graph));
+    LW_Graph G = (LW_Graph*) malloc(sizeof(struct lw_graph));
     if(G == NULL)
         return NULL;
     G->V = V;
@@ -111,7 +109,7 @@ int lwg_removeEdge(LW_Graph G, vertex v, vertex u)
     return 0;
 }
 
-int lwg_getEdge(LW_Graph G, vertex v, vertex u)
+double lwg_getEdge(LW_Graph G, vertex v, vertex u)
 {
     v--; u--;
     return lw_find(G->adj[v], u);
@@ -134,6 +132,6 @@ void lwg_show(LW_Graph G)
     for(i = 0; i < G->V; i++)
     {
         printf("%d: ", i+1);
-        l_show(G->adj[i]);
+        lw_show(G->adj[i]);
     }
 }

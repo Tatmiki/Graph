@@ -616,7 +616,7 @@ int lwg_removeEdge(LW_Graph G, vertex v, vertex u);
  * @retval int - Retorna o peso da aresta u - v; 
  * @retval 0 - NÃO existe uma aresta entre u e v.
  */
-int lwg_getEdge(LW_Graph G, vertex v, vertex u);
+double lwg_getEdge(LW_Graph G, vertex v, vertex u);
 
 /**
  * @brief list_wighted_graph: Retorna o número de vértices do grafo.

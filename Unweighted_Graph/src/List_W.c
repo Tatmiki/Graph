@@ -100,7 +100,7 @@ void lw_show(List_W lw)
     Node_W head = lw->head;
     while(head != NULL)
     {
-        printf(" -> %d | %.2lf", head->v+1, head->w);
+        printf(" -> %7d | %6.2lf", head->v+1, head->w);
         head = head->next;
     }
     putchar('\n');
