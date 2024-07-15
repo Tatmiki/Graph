@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../include/Graph.h"
+#include "../../include/Graph.h"
 
 // 1. tamanhos em mb
 int main()
