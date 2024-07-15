@@ -46,7 +46,7 @@ typedef struct m_graph *M_Graph;
  * adjacências. Os índices de um grafo criado são acessados de 1 a N, sendo N o 
  * último vértice do grafo.
  */
-typedef struct m_graph *LW_Graph;
+typedef struct lw_graph *LW_Graph;
 
 /**
  * @brief Definição da estrutura do grafo ponderado com representação em matriz de 
@@ -616,7 +616,7 @@ int lwg_removeEdge(LW_Graph G, vertex v, vertex u);
  * @retval int - Retorna o peso da aresta u - v; 
  * @retval 0 - NÃO existe uma aresta entre u e v.
  */
-int lwg_getEdge(LW_Graph G, vertex v, vertex u);
+double lwg_getEdge(LW_Graph G, vertex v, vertex u);
 
 /**
  * @brief list_wighted_graph: Retorna o número de vértices do grafo.
