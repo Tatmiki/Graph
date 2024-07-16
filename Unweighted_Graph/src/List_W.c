@@ -25,8 +25,8 @@ static Node_W newNode(int v, double w, Node_W next)
     Node_W newNode = (Node_W) malloc(sizeof(struct node_w));
     if(newNode == NULL)
         exit(EXIT_FAILURE);
-    newNode->v = v;
-    newNode->w = w;
+    newNode->edge.v = v;
+    newNode->edge.weight = w;
     newNode->next = next;
     return newNode;
 }
@@ -68,7 +68,7 @@ int lw_remove(List_W lw, int v)
 
     while(current != NULL)
     {
-        if(current->v == v)
+        if(current->edge.v == v)
         {
             if(previous != NULL)
                 previous->next = current->next;
@@ -84,25 +84,23 @@ int lw_remove(List_W lw, int v)
     return 0;
 }
 
-double lw_find(List_W lw, int v)
-{
-    Node_W head = lw->head;
-    while(head != NULL){
-        if(head->v == v)
-            return head->w;
-        head = head->next;
-    }
-    return 0;
-}
-
-void lw_show(List_W lw)
+WeightedEdge* lw_find(List_W lw, int v)
 {
     Node_W head = lw->head;
     while(head != NULL)
     {
-        printf(" -> %7d | %6.2lf", head->v+1, head->w);
+        if(head->edge.v == v)
+            return &head->edge;
         head = head->next;
     }
+    return NULL;
+}
+
+void lw_show(List_W lw)
+{
+    Node_W head;
+    for(head = lw->head; head != NULL; head = head->next)
+        printf(" -> %7d | %6.2lf", head->edge.v+1, head->edge.weight);
     putchar('\n');
 }
 

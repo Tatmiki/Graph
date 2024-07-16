@@ -10,13 +10,14 @@
 #ifndef LIST_W_H
 #define LIST_W_H
 
+#include "Util.h"
+
 /**
  * @brief Estrutura de nó para navegação da lista dinâmica.
  */
 typedef struct node_w 
 {
-    int v;                  /*> Elemento inteiro.                           */
-    double w;               /*> Elemento real.                              */
+    WeightedEdge edge;         /*> Par ordenado de vértice e peso.             */
     struct node_w* next;    /*> Ponteiro para o próximo elemento da lista.  */
 } *Node_W;
 
@@ -76,7 +77,7 @@ int lw_remove(List_W lw, int v);
  * @retval double - Valor de w do elemento encontrado;
  * @retval 0 - Elemento não encontrado.
  */
-double lw_find(List_W lw, int v);
+WeightedEdge* lw_find(List_W lw, int v);
 
 /**
  * @brief Exibe a lista.

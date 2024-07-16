@@ -11,11 +11,10 @@
 
 #include <stdlib.h>
 #include "../include/PriorityQueue.h"
-#include "../include/Util.h"
 
 struct priority_queue
 {
-    int* heapTree;
+    WeightedEdge* heapTree;
     int size;
     int capacity;
 };
@@ -37,9 +36,9 @@ static int right(int i)
 
 static void heapify_up(PriorityQueue pq, int i)
 {
-    while(i > 0 && pq->heapTree[parent(i)] > pq->heapTree[i])
+    while(i > 0 && pq->heapTree[parent(i)].weight > pq->heapTree[i].weight)
     {
-        swap(&pq->heapTree[parent(i)], &pq->heapTree[i]);
+        swapEdge(&pq->heapTree[parent(i)], &pq->heapTree[i]);
         i = parent(i);
     }
 }
@@ -50,15 +49,15 @@ static void heapify_down(PriorityQueue pq, int i)
     {
         if(right(i) < pq->size)
         {
-            if(pq->heapTree[left(i)] < pq->heapTree[right(i)])
+            if(pq->heapTree[left(i)].weight < pq->heapTree[right(i)].weight)
                 i = left(i);
             else
                 i = right(i);
         }
         else
             i = left(i);
-        if(pq->heapTree[i] < pq->heapTree[parent(i)])
-            swap(&pq->heapTree[i], &pq->heapTree[parent(i)]);
+        if(pq->heapTree[i].weight < pq->heapTree[parent(i)].weight)
+            swapEdge(&pq->heapTree[i], &pq->heapTree[parent(i)]);
     }
 }
 
@@ -67,7 +66,7 @@ PriorityQueue pq_initPQueue(int capacity)
     PriorityQueue pq = (PriorityQueue) malloc(sizeof(struct priority_queue));
     if(pq == NULL)
         return NULL;
-    pq->heapTree = (int*) malloc(sizeof(int) * capacity);
+    pq->heapTree = (WeightedEdge*) malloc(sizeof(WeightedEdge) * capacity);
     if(pq->heapTree == NULL)
     {
         free(pq);
@@ -85,7 +84,7 @@ void pq_destroyPQueue(PriorityQueue *pq)
     *pq = NULL;
 }
 
-int pq_enqueue(PriorityQueue pq, int w)
+int pq_enqueue(PriorityQueue pq, WeightedEdge w)
 {
     if(pq->size == pq->capacity)
         return 0;
@@ -96,18 +95,18 @@ int pq_enqueue(PriorityQueue pq, int w)
     return 1;
 }
 
-int pq_dequeue(PriorityQueue pq)
+WeightedEdge* pq_dequeue(PriorityQueue pq)
 {
-    int min = pq->heapTree[0];
+    WeightedEdge *min = &pq->heapTree[0];
     pq->heapTree[0] = pq->heapTree[pq->size-1];
     pq->size--;
     heapify_down(pq, 0);
     return min;
 }
 
-int pq_front(PriorityQueue pq)
+WeightedEdge* pq_front(PriorityQueue pq)
 {
-    return pq->heapTree[0];
+    return &pq->heapTree[0];
 }
 
 int pq_isEmpty(PriorityQueue pq)

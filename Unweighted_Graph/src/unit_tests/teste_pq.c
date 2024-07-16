@@ -1,23 +1,28 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include "../../include/PriorityQueue.h"
 
 int main()
 {
+    srand(time(0));
     PriorityQueue pq = pq_initPQueue(10);
     if(pq == NULL)
         return 0;
-    pq_enqueue(pq, 20);
-    pq_enqueue(pq, 30);
-    pq_enqueue(pq, 10);
-    pq_enqueue(pq, 40);
-    pq_enqueue(pq, 2);
-    pq_enqueue(pq, 3);
-    pq_enqueue(pq, 8);
-    pq_enqueue(pq, 11);
-    pq_enqueue(pq, 1);
+    WeightedEdge w;
+    int i;
+    for(i = 0; i < 20; i++)
+    {
+        w.v = rand()%101;
+        w.weight = rand()%101;
+        pq_enqueue(pq, w);
+    }
     
+    WeightedEdge *wp = pq_dequeue(pq);
     while(!pq_isEmpty(pq))
-        printf("%d\n", pq_dequeue(pq));
-        
+    {
+        printf("%3d %.2lf\n", wp->v, wp->weight);
+        wp = pq_dequeue(pq);
+    }   
     pq_destroyPQueue(&pq);
 }

@@ -9,8 +9,8 @@
  * 
  */
 
-#ifndef GRAPH_UTIL_H
-#define GRAPH_UTIL_H
+#ifndef UTIL_H
+#define UTIL_H
 
 #include "Graph.h"
 
@@ -25,12 +25,30 @@ typedef struct
 } Vertex_info;
 
 /**
+ * @brief Estrutura de apoio para o algoritmo de Dijkstra.
+ */
+typedef struct
+{
+    char visited;       /*> Estado do visitado do vértice. ('W'hite não visitado e 'B'lack de visitado) */
+    vertex father;      /*> Antecessor/pai do vértice.                                                  */
+    double distance;    /*> Distância do vértice em relação a origem do algoritmo.                      */
+} Vertex_djk;
+
+typedef struct
+{
+    vertex v;
+    double weight;
+} WeightedEdge;
+
+/**
  * @brief Troca o valor de duas variáveis inteiras
  * 
  * @param a Endereço da variável a.
  * @param b Endereço da variável b.
  */
 void swap(int* a, int* b);
+
+void swapEdge(WeightedEdge *a, WeightedEdge *b);
 
 /**
  * @brief Realiza a ordenação rápida de um vetor em ordem crescente.

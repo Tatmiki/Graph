@@ -12,6 +12,8 @@
 #ifndef PRIORITY_QUEUE_H
 #define PRIORITY_QUEUE_H
 
+#include "Util.h"
+
 /**
  * @brief Estrutura da fila de prioridade implementada com árvore mín heap.
  * 
@@ -45,7 +47,7 @@ void pq_destroyPQueue(PriorityQueue *pq);
  * @retval 1 - Valor inserido com sucesso;
  * @retval 0 - Falha na alocação de memória.
  */
-int pq_enqueue(PriorityQueue pq, int w);
+int pq_enqueue(PriorityQueue pq, WeightedEdge w);
 
 /**
  * @brief Desenfilera um elemento do início da fila (menor elemento presente na fila).
@@ -56,7 +58,7 @@ int pq_enqueue(PriorityQueue pq, int w);
  * 
  * @retval int - Elemento que foi removido da fila.
  */
-int pq_dequeue(PriorityQueue pq);
+WeightedEdge* pq_dequeue(PriorityQueue pq);
 
 /**
  * @brief Retorna o primeiro elemento da fila (menor elemento presente na fila).
@@ -67,7 +69,7 @@ int pq_dequeue(PriorityQueue pq);
  * 
  * @retval int - Primeiro elemento da fila. 
  */
-int pq_front(PriorityQueue pq);
+WeightedEdge* pq_front(PriorityQueue pq);
 
 /**
  * @brief Verifica se a fila está vazia.

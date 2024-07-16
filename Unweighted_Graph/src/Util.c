@@ -18,6 +18,13 @@ void swap(int* a, int* b)
     *b = temp;
 }
 
+void swapEdge(WeightedEdge *a, WeightedEdge *b)
+{
+    WeightedEdge temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
 void quicksort(int vet[], const int start, const int end)
 {
     int left = start, right = end, pivot = vet[(start+end)/2];
