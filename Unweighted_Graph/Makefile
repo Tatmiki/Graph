@@ -14,7 +14,6 @@ UNIT_TESTS = $(wildcard $(TESTS_SRC)/*.c)
 TEST_EXECUTABLES = $(patsubst $(TESTS_SRC)/%.c, $(TESTS)/%, $(UNIT_TESTS))
 
 all: lib tests
-	echo $(TEST_EXECUTABLES)
 
 lib: 	$(BIN)/List.o 			\
 	 	$(BIN)/List_W.o 		\

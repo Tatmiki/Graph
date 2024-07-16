@@ -22,6 +22,25 @@ struct lw_graph
     List_W *adj;
 };
 
+/**
+ * @brief Verifica a existência de uma aresta com peso negativo no grafo.
+ * 
+ * @param G Grafo em questão.
+ * 
+ * @retval 1 - Há ao menos uma aresta com peso negativo;
+ * @retval 0 - Não há arestas com peso negativo.
+ */
+static int checkNegativeEdge(LW_Graph G)
+{
+    Node_W head;
+    vertex v;
+    for(v = 0; v < G->V; v++)
+        for(head = G->adj[v]->head; head != NULL; head = head->next)
+            if(head->edge.weight < 0)
+                return 0;
+    return 1;
+}
+
 unsigned long long lwg_representationSize(unsigned long long V, unsigned long long E)
 {
     // custo da estrutura + custo do vetor de ponteiros de lista 
@@ -59,12 +78,12 @@ LW_Graph lwg_makeGraphFromFile(char *path)
 
 LW_Graph lwg_makeGraph(int V)
 {
-    LW_Graph G = (LW_Graph*) malloc(sizeof(struct lw_graph));
+    LW_Graph G = (LW_Graph) malloc(sizeof(struct lw_graph));
     if(G == NULL)
         return NULL;
     G->V = V;
     G->E = 0;
-    G->adj = (List_W) malloc(sizeof(struct list_w) * V); // aloca um vetor de listas
+    G->adj = (List_W*) malloc(sizeof(List_W) * V); // aloca um vetor de listas
     if(G->adj == NULL)
     {
         free(G);
@@ -91,7 +110,7 @@ void lwg_destroyGraph(LW_Graph *G)
 int lwg_insertEdge(LW_Graph G, vertex v, vertex u, double w)
 {
     v--; u--;
-    if(lw_find(G->adj[v], u))
+    if(lw_find(G->adj[v], u) != NULL)
         return 0;
     lw_insertBeggining(G->adj[v], u, w);
     lw_insertBeggining(G->adj[u], v, w);
@@ -112,7 +131,10 @@ int lwg_removeEdge(LW_Graph G, vertex v, vertex u)
 double lwg_getEdge(LW_Graph G, vertex v, vertex u)
 {
     v--; u--;
-    return lw_find(G->adj[v], u);
+    WeightedEdge *w = lw_find(G->adj[v], u);
+    if(w == NULL)
+        return -1;
+    return w->weight;
 }
 
 int lwg_getNumOfVertexes(LW_Graph G)
