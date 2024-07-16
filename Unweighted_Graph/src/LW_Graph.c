@@ -14,6 +14,7 @@
 #include <limits.h>
 #include "../include/Graph.h"
 #include "../include/List_W.h"
+#include "../include/Util.h"
 
 struct lw_graph
 {
@@ -157,3 +158,4 @@ void lwg_show(LW_Graph G)
         lw_show(G->adj[i]);
     }
 }
+
