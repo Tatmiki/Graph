@@ -71,11 +71,20 @@ static void freeMatrix(float **matrix, int n)
     free(matrix);
 }
 
+static int negativeEdgeVerification(MW_Graph G)
+{
+    vertex i,j;
+    for(i = 0; i < G->V; i++)
+        for(j = 0; j < G->V; j++)
+            if(G->adj[i][j] < 0)
+                return 0;
+    return 1;
+}
+
 unsigned long long mwg_representationSize(unsigned long long V)
 {
     return sizeof(struct mw_graph) + (V * V) * sizeof(float); 
 }
-
 
 MW_Graph mwg_makeGraphFromFile(char *path)
 {
@@ -102,7 +111,6 @@ MW_Graph mwg_makeGraphFromFile(char *path)
     return G;
 }
 
-
 MW_Graph mwg_makeGraph(int V)
 {
     MW_Graph G = (struct mw_graph*) malloc(sizeof(struct mw_graph));
@@ -114,14 +122,12 @@ MW_Graph mwg_makeGraph(int V)
     return G;
 }
 
-
 void mwg_destroyGraph(MW_Graph *G)
 {
     freeMatrix((*G)->adj, (*G)->V);
     free(*G);
     G = NULL;
 }
-
 
 int mwg_insertEdge(MW_Graph G, vertex v, vertex u, float w)
 {
@@ -147,24 +153,20 @@ int mwwg_removeEdge(MW_Graph G, vertex v, vertex u)
     return 0;
 }
 
-
 float mwg_getEdge(MW_Graph G, vertex v, vertex u)
 {
     return G->adj[v-1][u-1];
 }
-
 
 int mwg_getNumOfVertexes(MW_Graph G)
 {
     return G->V;
 }
 
-
 int mwg_getNumOfEdges(MW_Graph G)
 {
     return G->E;
 }
-
 
 void mwg_show(MW_Graph G)
 {
@@ -179,4 +181,94 @@ void mwg_show(MW_Graph G)
         }
         putchar('\n');
     }
+}
+
+int mwg_dijkstraVet(MW_Graph G, vertex v, char *path)
+{
+    v--; 
+    int w, u, x;
+    double shortest_distance;
+    Vertex_djk *vertices = (Vertex_djk*) malloc(sizeof(Vertex_djk) * G->V);
+    if (vertices == NULL)
+        return 0;
+
+    if (v < 0 || v >= G->V) {
+        free(vertices);
+        return 0;
+    }
+
+    if (!negativeEdgeVerification(G)) {
+        free(vertices);
+        return 0;
+    }
+
+    for (w = 0; w < G->V; w++) {
+        vertices[w].visited = 'W';
+        vertices[w].father = -1;
+        vertices[w].distance = INT_MAX; 
+    }
+
+    vertices[v].distance = 0.0;
+
+    int all_visited = 0;
+    while (!all_visited) {
+        shortest_distance = INT_MAX;
+        u = -1;
+
+        for (x = 0; x < G->V; x++) {
+            if (vertices[x].visited == 'W' && vertices[x].distance < shortest_distance) {
+                shortest_distance = vertices[x].distance;
+                u = x;
+            }
+        }
+
+        if (u == -1 || shortest_distance == INT_MAX)
+            break;
+
+        vertices[u].visited = 'B';
+
+        for (w = 0; w < G->V; w++) {
+            if (G->adj[u][w] > 0) {
+                double weight = G->adj[u][w];
+                if (vertices[w].visited == 'W' && vertices[w].distance > vertices[u].distance + weight) {
+                    vertices[w].distance = vertices[u].distance + weight;
+                    vertices[w].father = u;
+                }
+            }
+        }
+
+        all_visited = 1;
+        for (x = 0; x < G->V; x++) {
+            if (vertices[x].visited == 'W') {
+                all_visited = 0;
+                break;
+            }
+        }
+    }
+
+    FILE *file = fopen(path, "w");
+    if (file == NULL) {
+        free(vertices);
+        return 0;
+    }
+
+    fprintf(file, "--- Arvore geradora minima ---\n", v + 1);
+    for (w = 0; w < G->V; w++) {
+        if (w != v) 
+        {
+            fprintf(file, "%d ~> %d | dist: %.2f\n", v + 1, w + 1, vertices[w].distance);
+        }
+    }
+
+    fclose(file);
+    free(vertices);
+
+    return 1;
+    
+
+}
+
+int mwg_dijkstraHeap(MW_Graph G, vertex v, char *path)
+{
+
 }

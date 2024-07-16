@@ -9,7 +9,9 @@ int main()
     printf("%d\n", mwg_getNumOfEdges(G));
     
     //printf("vertices: %d\narestas: %d\n", mg_getNumOfVertexes(G), mg_getNumOfEdges(G));
+    // getchar();
+    // mwg_show(G);
     getchar();
-    mwg_show(G);
+    mwg_dijkstraVet(G,1,"./graphs/output/dikjVet.txt");
     mwg_destroyGraph(&G);
 }
