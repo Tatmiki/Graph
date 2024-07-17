@@ -58,7 +58,7 @@ int pq_enqueue(PriorityQueue pq, WeightedEdge w);
  * 
  * @retval int - Elemento que foi removido da fila.
  */
-WeightedEdge* pq_dequeue(PriorityQueue pq);
+WeightedEdge pq_dequeue(PriorityQueue pq);
 
 /**
  * @brief Retorna o primeiro elemento da fila (menor elemento presente na fila).
@@ -69,7 +69,7 @@ WeightedEdge* pq_dequeue(PriorityQueue pq);
  * 
  * @retval int - Primeiro elemento da fila. 
  */
-WeightedEdge* pq_front(PriorityQueue pq);
+WeightedEdge pq_front(PriorityQueue pq);
 
 /**
  * @brief Verifica se a fila está vazia.
