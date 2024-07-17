@@ -95,18 +95,23 @@ int pq_enqueue(PriorityQueue pq, WeightedEdge w)
     return 1;
 }
 
-WeightedEdge* pq_dequeue(PriorityQueue pq)
+WeightedEdge pq_dequeue(PriorityQueue pq)
 {
-    WeightedEdge *min = &pq->heapTree[0];
+    WeightedEdge min = pq->heapTree[0];
     pq->heapTree[0] = pq->heapTree[pq->size-1];
     pq->size--;
     heapify_down(pq, 0);
     return min;
 }
 
-WeightedEdge* pq_front(PriorityQueue pq)
+WeightedEdge pq_front(PriorityQueue pq)
 {
-    return &pq->heapTree[0];
+    return pq->heapTree[0];
+}
+
+int pq_getSize(PriorityQueue pq)
+{
+    return pq->size;
 }
 
 int pq_isEmpty(PriorityQueue pq)
