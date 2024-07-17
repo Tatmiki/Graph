@@ -233,7 +233,69 @@ double lwg_distance(LW_Graph G, vertex u, vertex v, char *path)
     pq_destroyPQueue(&pq);
     free(vertexes);
     return distance;
-    return -1; 
+}
+
+double lwg_distanceVetDj(LW_Graph G, vertex u, vertex v, char *path)
+{
+    if(checkNegativeEdge(G))
+        return 0;
+    u--; v--;
+    Vertex_djk *vertexes = (Vertex_djk*) malloc(sizeof(Vertex_djk) * G->V);
+    vertex w;
+    for(w = 0; w < G->V; w++)
+    {
+        vertexes[w].distance = DOUBLE_MAX;
+        vertexes[w].father = -1;
+        vertexes[w].visited = 'W';
+    }
+
+    // Inicializa a heap
+    vertexes[u].distance = 0.;
+    Node_W head;
+    double min;
+    vertex pivot = u;
+
+    while(1)
+    {
+        min = DOUBLE_MAX;
+
+        for(w = 0; w < G->V; w++)
+        {
+            if(vertexes[w].visited == 'B') continue;
+            if(vertexes[w].distance < min)
+            {
+                min = vertexes[w].distance;
+                pivot = w;
+            }
+        }
+
+        if(fabs(min - DOUBLE_MAX) < EPSILON) break;
+
+        for(head = G->adj[pivot]->head; head != NULL; head = head->next)
+        {
+            if(vertexes[head->edge.v].visited == 'B') continue;
+            if(vertexes[head->edge.v].distance > vertexes[pivot].distance + head->edge.weight)
+            {
+                vertexes[head->edge.v].distance = vertexes[pivot].distance + head->edge.weight;
+                vertexes[head->edge.v].father = pivot;
+            }
+        }
+        vertexes[pivot].visited = 'B';
+    }
+    
+    double distance = vertexes[v].distance;
+    FILE *f = fopen(path, "w");
+    if(f == NULL)
+    {
+        free(vertexes);
+        return 0;
+    }
+    fprintf(f, "START\n");
+    lwg_shortestPath(v, vertexes, f);
+    fprintf(f, "END\n");
+    fclose(f);
+    free(vertexes);
+    return distance;
 }
 
 int lwg_dijkstraVet(LW_Graph G, vertex v, char *path)

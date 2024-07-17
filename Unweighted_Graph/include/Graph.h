@@ -644,7 +644,7 @@ void lwg_show(LW_Graph G);
 
 /**
  * @brief Calcula a distãncia entre dois vértices e gera um arquivo contendo o caminho
- * entre vértices de u a v.
+ * entre vértices de u a v. Implementação com Dijkstra usando heap de distâncias.
  * 
  * @param G Grafo em questão;
  * @param u Vértice de origem;
@@ -656,6 +656,21 @@ void lwg_show(LW_Graph G);
  * @retval -1 - Não há caminho de u a v, arquivo de saída não gerado.
  */
 double lwg_distance(LW_Graph G, vertex u, vertex v, char *path);
+
+/**
+ * @brief Calcula a distãncia entre dois vértices e gera um arquivo contendo o caminho
+ * entre vértices de u a v. Implementação com Dijkstra usando vetor de distâncias.
+ * 
+ * @param G Grafo em questão;
+ * @param u Vértice de origem;
+ * @param v Vértice de destino.
+ * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
+ * 
+ * @retval double - Distância mínima para chegar de u a v;
+ * @retval 0 - Erro na geração do arquivo de saída.
+ * @retval -1 - Não há caminho de u a v, arquivo de saída não gerado.
+ */
+double lwg_distanceVetDj(LW_Graph G, vertex u, vertex v, char *path);
 
 /**
  * @brief Gera um arquivo de saída da árvore geradora mínima induzida pelo algoritmo de Dijkstra.
