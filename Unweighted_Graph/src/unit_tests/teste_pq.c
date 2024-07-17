@@ -17,7 +17,6 @@ int main()
         w.weight = rand()%101;
         pq_enqueue(pq, w);
     }
-    
     WeightedEdge wp = pq_dequeue(pq);
     while(!pq_isEmpty(pq))
     {

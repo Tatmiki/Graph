@@ -814,7 +814,7 @@ double mwg_distance(MW_Graph G, vertex u, vertex v);
  * @retval 1 - Arquivo de saída gerado com sucesso;
  * @retval 0 - Erro na geração do arquivo de saída.
  */
-int mwg_dijkstraVet(MW_Graph G, vertex v);
+int mwg_dijkstraVet(MW_Graph G, vertex v, char *path);
 
 /**
  * @brief Gera um arquivo de saída da árvore geradora mínima induzida pelo algoritmo de Dijkstra.
@@ -826,7 +826,7 @@ int mwg_dijkstraVet(MW_Graph G, vertex v);
  * @retval 1 - Arquivo de saída gerado com sucesso;
  * @retval 0 - Erro na geração do arquivo de saída.
  */
-int mwg_dijkstraHeap(MW_Graph G, vertex v);
+int mwg_dijkstraHeap(MW_Graph G, vertex v, char *path);
 
 //----------------------------------------------------------------------------------
 
