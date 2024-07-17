@@ -649,11 +649,13 @@ void lwg_show(LW_Graph G);
  * @param G Grafo em questão;
  * @param u Vértice de origem;
  * @param v Vértice de destino.
+ * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
  * 
  * @retval double - Distância mínima para chegar de u a v;
- * @retval -1 - Não há caminho de u a v.
+ * @retval 0 - Erro na geração do arquivo de saída.
+ * @retval -1 - Não há caminho de u a v, arquivo de saída não gerado.
  */
-double lwg_distance(LW_Graph G, vertex u, vertex v);
+double lwg_distance(LW_Graph G, vertex u, vertex v, char *path);
 
 /**
  * @brief Gera um arquivo de saída da árvore geradora mínima induzida pelo algoritmo de Dijkstra.
@@ -661,11 +663,12 @@ double lwg_distance(LW_Graph G, vertex u, vertex v);
  * 
  * @param G Grafo em questão;
  * @param v Vértice inicial.
+ * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
  * 
  * @retval 1 - Arquivo de saída gerado com sucesso;
  * @retval 0 - Erro na geração do arquivo de saída.
  */
-int lwg_dijkstraVet(LW_Graph G, vertex v);
+int lwg_dijkstraVet(LW_Graph G, vertex v, char *path);
 
 /**
  * @brief Gera um arquivo de saída da árvore geradora mínima induzida pelo algoritmo de Dijkstra.
@@ -673,11 +676,12 @@ int lwg_dijkstraVet(LW_Graph G, vertex v);
  * 
  * @param G Grafo em questão;
  * @param v Vértice inicial.
+ * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
  * 
  * @retval 1 - Arquivo de saída gerado com sucesso;
  * @retval 0 - Erro na geração do arquivo de saída.
  */
-int lwg_dijkstraHeap(LW_Graph G, vertex v);
+int lwg_dijkstraHeap(LW_Graph G, vertex v, char *path);
 
 //----------------------------------------------------------------------------------
 

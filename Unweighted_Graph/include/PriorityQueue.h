@@ -72,6 +72,15 @@ WeightedEdge pq_dequeue(PriorityQueue pq);
 WeightedEdge pq_front(PriorityQueue pq);
 
 /**
+ * @brief Retorna o tamanho da fila de prioridade.
+ * 
+ * @param pq Fila em questão.
+ * 
+ * @retval int - Tamanho da fila.
+ */
+int pq_getSize(PriorityQueue pq);
+
+/**
  * @brief Verifica se a fila está vazia.
  * 
  * @param pq Fila em questão.

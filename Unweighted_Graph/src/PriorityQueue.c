@@ -109,6 +109,11 @@ WeightedEdge pq_front(PriorityQueue pq)
     return pq->heapTree[0];
 }
 
+int pq_getSize(PriorityQueue pq)
+{
+    return pq->size;
+}
+
 int pq_isEmpty(PriorityQueue pq)
 {
     return pq->size == 0;
