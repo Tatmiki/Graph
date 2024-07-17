@@ -47,6 +47,13 @@ static int checkNegativeEdge(LW_Graph G)
     return 0;
 }
 
+/**
+ * @brief Gera o arquivo de saída do caminho mínimo a ser percorrido entre vértices.
+ * 
+ * @param v Vértice final;
+ * @param vertexes Vetor de distãncias do Dijkstra;
+ * @param f Arquivo aberto que será imprimido o caminho.
+ */
 static void lwg_shortestPath(vertex v, Vertex_djk *vertexes, FILE *f)
 {
     if(vertexes[v].father != -1)
@@ -265,8 +272,6 @@ int lwg_dijkstraVet(LW_Graph G, vertex v, char *path)
 
         if(fabs(min - DOUBLE_MAX) < EPSILON) break;
 
-        printf("o pivo ja foi:  %d\n", pivot);
-
         for(head = G->adj[pivot]->head; head != NULL; head = head->next)
         {
             if(vertexes[head->edge.v].visited == 'B') continue;
@@ -286,9 +291,10 @@ int lwg_dijkstraVet(LW_Graph G, vertex v, char *path)
         free(vertexes);
         return 0;
     }
+    fprintf(f, "--- Arvore geradora minima de %d---\n", v + 1);
     for (w = 0; w < G->V; w++)
     {
-        fprintf(f, "vertex=%d\tfather=%d\tdistance=%.2lf\n", w + 1, vertexes[w].father + 1, vertexes[w].distance);
+        fprintf(f, "%d ~> %d | dist: %.2f\n", v + 1, w + 1, vertexes[w].distance);
     }
     fclose(f);
     free(vertexes);
@@ -340,9 +346,10 @@ int lwg_dijkstraHeap(LW_Graph G, vertex v, char *path)
         free(vertexes);
         return 0;
     }
+    fprintf(f, "--- Arvore geradora minima de %d---\n", v + 1);
     for (w = 0; w < G->V; w++)
     {
-        fprintf(f, "vertex=%u\tfather=%d\tdistance=%.2lf\n", w + 1, vertexes[w].father + 1, vertexes[w].distance);
+        fprintf(f, "%d ~> %d | dist: %.2f\n", v + 1, w + 1, vertexes[w].distance);
     }
     fclose(f);
     free(vertexes);
