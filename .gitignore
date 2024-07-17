@@ -1,7 +1,7 @@
 .vscode
 *.o
 *.a
-./Unweighted_Graph/tests/*
+./libGraph/tests/*
 main
 main2
 grafo_3.txt
