@@ -8,13 +8,14 @@
  * @copyright Copyright (c) 2024
  * 
  */
-
+#define FLOAT_MAX 3.402823466e+38F
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
 #include "../include/Graph.h"
 #include "../include/Util.h"
 #include "../include/CCUtil.h"
+#include "../include/PriorityQueue.h"
 
 struct mw_graph
 {
@@ -79,6 +80,17 @@ static int negativeEdgeVerification(MW_Graph G)
             if(G->adj[i][j] < 0)
                 return 0;
     return 1;
+}
+
+static void mwg_shortestPath(vertex v, Vertex_djk *vertexes, FILE *f)
+{
+    if(vertexes[v].distance != 0.)
+    {
+        mwg_shortestPath(vertexes[v].father, vertexes, f);
+        fprintf(f, "%d,\n", v+1);
+    }
+    else
+        fprintf(f, "%d,\n", v+1);
 }
 
 unsigned long long mwg_representationSize(unsigned long long V)
@@ -183,32 +195,109 @@ void mwg_show(MW_Graph G)
     }
 }
 
+double mwg_distance(MW_Graph G, vertex u, vertex v)
+{
+    u--; v--; 
+
+    if (!negativeEdgeVerification(G))
+        return -1;
+
+    int w, x;
+    double shortest_distance;
+    Vertex_djk *vertexes = (Vertex_djk*) malloc(sizeof(Vertex_djk) * G->V);
+    if (vertexes == NULL)
+        return -1;
+
+    for (w = 0; w < G->V; w++) 
+    {
+        vertexes[w].visited = 'W';
+        vertexes[w].father = -1;
+        vertexes[w].distance = INT_MAX; 
+    }
+
+    vertexes[u].distance = 0.0;
+
+    int all_visited = 0;
+    while (!all_visited) 
+    {
+        shortest_distance = INT_MAX;
+        int u_index = -1;
+
+        for (x = 0; x < G->V; x++) 
+            if (vertexes[x].visited == 'W' && vertexes[x].distance < shortest_distance) 
+            {
+                shortest_distance = vertexes[x].distance;
+                u_index = x;
+            }
+        
+        if (u_index == -1 || shortest_distance == INT_MAX)
+            break;
+
+        vertexes[u_index].visited = 'B';
+
+        for (w = 0; w < G->V; w++) 
+            if (G->adj[u_index][w] > 0) 
+            {
+                double weight = G->adj[u_index][w];
+                if (vertexes[w].visited == 'W' && vertexes[w].distance > vertexes[u_index].distance + weight) 
+                {
+                    vertexes[w].distance = vertexes[u_index].distance + weight;
+                    vertexes[w].father = u_index;
+                }
+            }
+
+        all_visited = 1;
+        for (x = 0; x < G->V; x++) 
+            if (vertexes[x].visited == 'W') 
+            {
+                all_visited = 0;
+                break;
+            }
+        
+    }
+    double distance = vertexes[v].distance;
+    
+    
+    FILE *f = fopen("./graphs/output/Caminho.txt", "w");
+    if(!f)
+    {
+        free(vertexes);
+        return 0;
+    } 
+    fprintf(f, "Start\n");
+    mwg_shortestPath(v, vertexes, f);
+    fprintf(f, "End\n");
+    fclose(f);
+    free(vertexes);
+    return distance;
+}
+
 int mwg_dijkstraVet(MW_Graph G, vertex v, char *path)
 {
     v--; 
     int w, u, x;
     double shortest_distance;
-    Vertex_djk *vertices = (Vertex_djk*) malloc(sizeof(Vertex_djk) * G->V);
-    if (vertices == NULL)
+    Vertex_djk *vertexes = (Vertex_djk*) malloc(sizeof(Vertex_djk) * G->V);
+    if (vertexes == NULL)
         return 0;
 
     if (v < 0 || v >= G->V) {
-        free(vertices);
+        free(vertexes);
         return 0;
     }
 
     if (!negativeEdgeVerification(G)) {
-        free(vertices);
+        free(vertexes);
         return 0;
     }
 
     for (w = 0; w < G->V; w++) {
-        vertices[w].visited = 'W';
-        vertices[w].father = -1;
-        vertices[w].distance = INT_MAX; 
+        vertexes[w].visited = 'W';
+        vertexes[w].father = -1;
+        vertexes[w].distance = INT_MAX; 
     }
 
-    vertices[v].distance = 0.0;
+    vertexes[v].distance = 0.0;
 
     int all_visited = 0;
     while (!all_visited) {
@@ -216,8 +305,8 @@ int mwg_dijkstraVet(MW_Graph G, vertex v, char *path)
         u = -1;
 
         for (x = 0; x < G->V; x++) {
-            if (vertices[x].visited == 'W' && vertices[x].distance < shortest_distance) {
-                shortest_distance = vertices[x].distance;
+            if (vertexes[x].visited == 'W' && vertexes[x].distance < shortest_distance) {
+                shortest_distance = vertexes[x].distance;
                 u = x;
             }
         }
@@ -225,21 +314,21 @@ int mwg_dijkstraVet(MW_Graph G, vertex v, char *path)
         if (u == -1 || shortest_distance == INT_MAX)
             break;
 
-        vertices[u].visited = 'B';
+        vertexes[u].visited = 'B';
 
         for (w = 0; w < G->V; w++) {
             if (G->adj[u][w] > 0) {
                 double weight = G->adj[u][w];
-                if (vertices[w].visited == 'W' && vertices[w].distance > vertices[u].distance + weight) {
-                    vertices[w].distance = vertices[u].distance + weight;
-                    vertices[w].father = u;
+                if (vertexes[w].visited == 'W' && vertexes[w].distance > vertexes[u].distance + weight) {
+                    vertexes[w].distance = vertexes[u].distance + weight;
+                    vertexes[w].father = u;
                 }
             }
         }
 
         all_visited = 1;
         for (x = 0; x < G->V; x++) {
-            if (vertices[x].visited == 'W') {
+            if (vertexes[x].visited == 'W') {
                 all_visited = 0;
                 break;
             }
@@ -248,20 +337,18 @@ int mwg_dijkstraVet(MW_Graph G, vertex v, char *path)
 
     FILE *file = fopen(path, "w");
     if (file == NULL) {
-        free(vertices);
+        free(vertexes);
         return 0;
     }
 
-    fprintf(file, "--- Arvore geradora minima ---\n", v + 1);
+    fprintf(file, "--- Arvore geradora minima de %u---\n", v + 1);
     for (w = 0; w < G->V; w++) {
-        if (w != v) 
-        {
-            fprintf(file, "%d ~> %d | dist: %.2f\n", v + 1, w + 1, vertices[w].distance);
-        }
+        fprintf(file, "%d ~> %d | dist: %.2f\n", v + 1, w + 1, vertexes[w].distance);
+        
     }
 
     fclose(file);
-    free(vertices);
+    free(vertexes);
 
     return 1;
     
@@ -270,5 +357,54 @@ int mwg_dijkstraVet(MW_Graph G, vertex v, char *path)
 
 int mwg_dijkstraHeap(MW_Graph G, vertex v, char *path)
 {
+    v--;
+    Vertex_djk *vertexes = (Vertex_djk*) malloc(sizeof(Vertex_djk) * G->V);
+    vertex w;
 
+    for(w = 0; w < G->V; w++)
+    {
+        vertexes[w].distance = FLOAT_MAX;
+        vertexes[w].father = -1;
+        vertexes[w].visited = 'W';
+    }
+
+    vertexes[v].distance = 0.;
+    PriorityQueue pq = pq_initPQueue(G->V);
+    WeightedEdge pivot = {v, 0.};
+    pq_enqueue(pq, pivot);
+
+    while(!pq_isEmpty(pq))
+    {
+        pivot = pq_dequeue(pq);
+
+        for (int w = 0; w < G->V; w++)
+        {
+            if (G->adj[pivot.v][w] > 0)  
+            {
+                if (vertexes[w].distance > vertexes[pivot.v].distance + G->adj[pivot.v][w])
+                {
+                    vertexes[w].distance = vertexes[pivot.v].distance + G->adj[pivot.v][w];
+                    vertexes[w].father = pivot.v;
+                    pq_enqueue(pq, (WeightedEdge){w, vertexes[w].distance});
+                }
+            }
+        }
+    }
+    
+    FILE *file = fopen(path, "w");
+    if (file == NULL) {
+        free(vertexes);
+        return 0;
+    }
+
+    fprintf(file, "--- Arvore geradora minima de %u---\n", v + 1);
+    for (w = 0; w < G->V; w++) {
+        fprintf(file, "%d ~> %d | dist: %.2f\n", v + 1, w + 1, vertexes[w].distance);
+        
+    }
+
+    fclose(file);
+    free(vertexes);
+
+    return 1;
 }

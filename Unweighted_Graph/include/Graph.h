@@ -798,7 +798,7 @@ void mwg_show(MW_Graph G);
  * @retval double - Distância mínima para chegar de u a v;
  * @retval -1 - Não há caminho de u a v.
  */
-double mwg_distance(MW_Graph G, vertex u, vertex v, char *path);
+double mwg_distance(MW_Graph G, vertex u, vertex v);
 
 /**
  * @brief Gera um arquivo de saída da árvore geradora mínima induzida pelo algoritmo de Dijkstra.

@@ -12,6 +12,9 @@ int main()
     // getchar();
     // mwg_show(G);
     getchar();
-    mwg_dijkstraVet(G,1,"./graphs/output/dikjVet.txt");
+    mwg_dijkstraHeap(G,10,"./graphs/output/dikjVet1.txt");
+    //mwg_dijkstraVet(G,10,"./graphs/output/dikjVet1.txt");
+    //printf("%f", mwg_distance(G,10,20));
+    //printf("%f", mwg_distance(G, 10, 20));
     mwg_destroyGraph(&G);
 }

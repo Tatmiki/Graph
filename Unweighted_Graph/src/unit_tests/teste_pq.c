@@ -18,11 +18,11 @@ int main()
         pq_enqueue(pq, w);
     }
     
-    WeightedEdge *wp = pq_dequeue(pq);
+    //WeightedEdge *wp = pq_dequeue(pq);
     while(!pq_isEmpty(pq))
     {
-        printf("%3d %.2lf\n", wp->v, wp->weight);
-        wp = pq_dequeue(pq);
+       // printf("%3d %.2lf\n", wp->v, wp->weight);
+       // wp = pq_dequeue(pq);
     }   
     pq_destroyPQueue(&pq);
 }
