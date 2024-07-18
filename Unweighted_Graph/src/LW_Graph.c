@@ -182,12 +182,14 @@ void lwg_show(LW_Graph G)
     }
 }
 
-double lwg_distance(LW_Graph G, vertex u, vertex v, char *path)
+double lwg_distanceHeapDjk(LW_Graph G, vertex u, vertex v, char *path)
 {
     if(checkNegativeEdge(G))
         return 0;
     u--; v--;
     Vertex_djk *vertexes = (Vertex_djk*) malloc(sizeof(Vertex_djk) * G->V);
+    if(vertexes == NULL)
+        return 0;
     vertex w;
 
     // Inicializa as distãncias, antecessores e estado de visitado
@@ -219,28 +221,40 @@ double lwg_distance(LW_Graph G, vertex u, vertex v, char *path)
             }
         }
     }
+    pq_destroyPQueue(&pq);
+    
     double distance = vertexes[v].distance;
-    FILE *f = fopen(path, "w");
-    if(f == NULL)
+    if(fabs(distance - DOUBLE_MAX) < EPSILON)
     {
         free(vertexes);
-        return 0;
+        return -1;
     }
-    fprintf(f, "START\n");
-    lwg_shortestPath(v, vertexes, f);
-    fprintf(f, "END\n");
-    fclose(f);
-    pq_destroyPQueue(&pq);
+
+    if(path != NULL)
+    {
+        FILE *f = fopen(path, "w");
+        if(f == NULL)
+        {
+            free(vertexes);
+            return 0;
+        }
+        fprintf(f, "START\n");
+        lwg_shortestPath(v, vertexes, f);
+        fprintf(f, "END\n");
+        fclose(f);
+    }
     free(vertexes);
     return distance;
 }
 
-double lwg_distanceVetDj(LW_Graph G, vertex u, vertex v, char *path)
+double lwg_distanceVetDjk(LW_Graph G, vertex u, vertex v, char *path)
 {
     if(checkNegativeEdge(G))
         return 0;
     u--; v--;
     Vertex_djk *vertexes = (Vertex_djk*) malloc(sizeof(Vertex_djk) * G->V);
+    if(vertexes == NULL)
+        return 0;
     vertex w;
     for(w = 0; w < G->V; w++)
     {
@@ -251,6 +265,7 @@ double lwg_distanceVetDj(LW_Graph G, vertex u, vertex v, char *path)
 
     // Inicializa a heap
     vertexes[u].distance = 0.;
+
     Node_W head;
     double min;
     vertex pivot = u;
@@ -284,26 +299,37 @@ double lwg_distanceVetDj(LW_Graph G, vertex u, vertex v, char *path)
     }
     
     double distance = vertexes[v].distance;
-    FILE *f = fopen(path, "w");
-    if(f == NULL)
+    if(fabs(distance - DOUBLE_MAX) < EPSILON)
     {
         free(vertexes);
-        return 0;
+        return -1;
     }
-    fprintf(f, "START\n");
-    lwg_shortestPath(v, vertexes, f);
-    fprintf(f, "END\n");
-    fclose(f);
+    
+    if(path != NULL)
+    {
+        FILE *f = fopen(path, "w");
+        if(f == NULL)
+        {
+            free(vertexes);
+            return 0;
+        }
+        fprintf(f, "START\n");
+        lwg_shortestPath(v, vertexes, f);
+        fprintf(f, "END\n");
+        fclose(f);
+    }
     free(vertexes);
     return distance;
 }
 
-int lwg_dijkstraVet(LW_Graph G, vertex v, char *path)
+double* lwg_dijkstraVet(LW_Graph G, vertex v, char *path)
 {
     if(checkNegativeEdge(G))
-        return 0;
+        return NULL;
     v--;
     Vertex_djk *vertexes = (Vertex_djk*) malloc(sizeof(Vertex_djk) * G->V);
+    if(vertexes == NULL)
+        return NULL;
     vertex w;
     for(w = 0; w < G->V; w++)
     {
@@ -346,27 +372,41 @@ int lwg_dijkstraVet(LW_Graph G, vertex v, char *path)
         vertexes[pivot].visited = 'B';
     }
     
-    // Escrevendo a saída no arquivo
-    FILE *f = fopen(path, "w");
-    if (!f)
+    // gerando vetor de distãncias de retorno
+    double *distances = (double*) malloc(sizeof(double) * G->V);
+    if(distances == NULL)
     {
         free(vertexes);
-        return 0;
+        return NULL;
     }
-    fprintf(f, "--- Arvore geradora minima de %d---\n", v + 1);
-    for (w = 0; w < G->V; w++)
+    for(w = 0; w < G->V; w++)
+        distances[w] = vertexes[w].distance;
+
+    // Escrevendo a saída no arquivo
+    if(path != NULL)
     {
-        fprintf(f, "%d ~> %d | dist: %.2f\n", v + 1, w + 1, vertexes[w].distance);
+        FILE *f = fopen(path, "w");
+        if (!f)
+        {
+            free(distances);
+            free(vertexes);
+            return NULL;
+        }
+        fprintf(f, "--- Arvore geradora minima de %d---\n", v + 1);
+        for (w = 0; w < G->V; w++)
+        {
+            fprintf(f, "%d ~> %d | dist: %.2f\n", v + 1, w + 1, vertexes[w].distance);
+        }
+        fclose(f);
     }
-    fclose(f);
     free(vertexes);
-    return 1;
+    return distances;
 }
 
-int lwg_dijkstraHeap(LW_Graph G, vertex v, char *path)
+double* lwg_dijkstraHeap(LW_Graph G, vertex v, char *path)
 {
     if(checkNegativeEdge(G))
-        return 0;
+        return NULL;
     v--;
     Vertex_djk *vertexes = (Vertex_djk*) malloc(sizeof(Vertex_djk) * G->V);
     vertex w;
@@ -400,20 +440,35 @@ int lwg_dijkstraHeap(LW_Graph G, vertex v, char *path)
             }
         }
     }
+    pq_destroyPQueue(&pq);
     
-    // Escrevendo a saída no arquivo
-    FILE *f = fopen(path, "w");
-    if (!f)
+    // gerando vetor de distãncias de retorno
+    double *distances = (double*) malloc(sizeof(double) * G->V);
+    if(distances == NULL)
     {
         free(vertexes);
-        return 0;
+        return NULL;
     }
-    fprintf(f, "--- Arvore geradora minima de %d---\n", v + 1);
-    for (w = 0; w < G->V; w++)
+    for(w = 0; w < G->V; w++)
+        distances[w] = vertexes[w].distance;
+
+    // Escrevendo a saída no arquivo
+    if(path != NULL)
     {
-        fprintf(f, "%d ~> %d | dist: %.2f\n", v + 1, w + 1, vertexes[w].distance);
+        FILE *f = fopen(path, "w");
+        if (!f)
+        {
+            free(distances);
+            free(vertexes);
+            return NULL;
+        }
+        fprintf(f, "--- Arvore geradora minima de %d---\n", v + 1);
+        for (w = 0; w < G->V; w++)
+        {
+            fprintf(f, "%d ~> %d | dist: %.2f\n", v + 1, w + 1, vertexes[w].distance);
+        }
+        fclose(f);
     }
-    fclose(f);
     free(vertexes);
-    return 1;
+    return distances;
 }

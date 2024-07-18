@@ -1,6 +1,0 @@
-numberOfVertexes=6
-numberOfEdges=7
-minDegree=2
-maxDegree=3
-mediumDegree=2.333333
-DegreeMedian=2.500000

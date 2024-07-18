@@ -648,14 +648,14 @@ void lwg_show(LW_Graph G);
  * 
  * @param G Grafo em questão;
  * @param u Vértice de origem;
- * @param v Vértice de destino.
- * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
+ * @param v Vértice de destino;
+ * @param path Caminho para o arquivo de saída do caminho mínimo. (DEIXE NULO PARA NÃO GERAR O ARQUIVO DE SAÍDA)
  * 
  * @retval double - Distância mínima para chegar de u a v;
  * @retval 0 - Erro na geração do arquivo de saída.
  * @retval -1 - Não há caminho de u a v, arquivo de saída não gerado.
  */
-double lwg_distance(LW_Graph G, vertex u, vertex v, char *path);
+double lwg_distanceHeapDjk(LW_Graph G, vertex u, vertex v, char *path);
 
 /**
  * @brief Calcula a distãncia entre dois vértices e gera um arquivo contendo o caminho
@@ -664,39 +664,47 @@ double lwg_distance(LW_Graph G, vertex u, vertex v, char *path);
  * @param G Grafo em questão;
  * @param u Vértice de origem;
  * @param v Vértice de destino.
- * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
+ * @param path Caminho para o arquivo de saída do caminho mínimo. (DEIXE NULO PARA NÃO GERAR O ARQUIVO DE SAÍDA)
  * 
  * @retval double - Distância mínima para chegar de u a v;
  * @retval 0 - Erro na geração do arquivo de saída.
  * @retval -1 - Não há caminho de u a v, arquivo de saída não gerado.
  */
-double lwg_distanceVetDj(LW_Graph G, vertex u, vertex v, char *path);
+double lwg_distanceVetDjk(LW_Graph G, vertex u, vertex v, char *path);
 
 /**
  * @brief Gera um arquivo de saída da árvore geradora mínima induzida pelo algoritmo de Dijkstra.
  * Essa implementação usa um vetor de distâncias para indução dos caminhos a percorrer.
  * 
+ * @warning Garanta que o retorno da função seja armazenado e desalocado devicamente com a função free()
+ * da biblioteca padrão <stdlib.h>.
+ * 
  * @param G Grafo em questão;
  * @param v Vértice inicial.
  * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
+ * (DEIXE NULO PARA NÃO GERAR O ARQUIVO DE SAÍDA)
  * 
  * @retval 1 - Arquivo de saída gerado com sucesso;
  * @retval 0 - Erro na geração do arquivo de saída.
  */
-int lwg_dijkstraVet(LW_Graph G, vertex v, char *path);
+double* lwg_dijkstraVet(LW_Graph G, vertex v, char *path);
 
 /**
  * @brief Gera um arquivo de saída da árvore geradora mínima induzida pelo algoritmo de Dijkstra.
  * Essa implementação usa uma árvore mín heap de distâncias para indução dos caminhos a percorrer.
  * 
+ * @warning Garanta que o retorno da função seja armazenado e desalocado devicamente com a função free()
+ * da biblioteca padrão <stdlib.h>.
+ * 
  * @param G Grafo em questão;
  * @param v Vértice inicial.
  * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
+ * (DEIXE NULO PARA NÃO GERAR O ARQUIVO DE SAÍDA)
  * 
  * @retval 1 - Arquivo de saída gerado com sucesso;
  * @retval 0 - Erro na geração do arquivo de saída.
  */
-int lwg_dijkstraHeap(LW_Graph G, vertex v, char *path);
+double* lwg_dijkstraHeap(LW_Graph G, vertex v, char *path);
 
 //----------------------------------------------------------------------------------
 
@@ -808,40 +816,65 @@ void mwg_show(MW_Graph G);
 
 /**
  * @brief Calcula a distãncia entre dois vértices e gera um arquivo contendo o caminho
- * entre vértices de u a v.
+ * entre vértices de u a v. Utiliza fila de prioridade para as distâncias.
  * 
  * @param G Grafo em questão;
  * @param u Vértice de origem;
- * @param v Vértice de destino.
+ * @param v Vértice de destino;
+ * @param path Caminho para o arquivo de saída do caminho mínimo. (DEIXE NULO PARA NÃO GERAR O ARQUIVO DE SAÍDA)
  * 
  * @retval double - Distância mínima para chegar de u a v;
  * @retval -1 - Não há caminho de u a v.
  */
-double mwg_distance(MW_Graph G, vertex u, vertex v, char *path);
+double mwg_distanceHeapDjk(MW_Graph G, vertex u, vertex v, char *path);
+
+/**
+ * @brief Calcula a distãncia entre dois vértices e gera um arquivo contendo o caminho
+ * entre vértices de u a v. Utiliza um vetor e busca sequencial para as distâncias.
+ * 
+ * @param G Grafo em questão;
+ * @param u Vértice de origem;
+ * @param v Vértice de destino;
+ * @param path Caminho para o arquivo de saída do caminho mínimo. (DEIXE NULO PARA NÃO GERAR O ARQUIVO DE SAÍDA)
+ * 
+ * @retval double - Distância mínima para chegar de u a v;
+ * @retval -1 - Não há caminho de u a v.
+ */
+double mwg_distanceVetDjk(MW_Graph G, vertex u, vertex v, char *path);
 
 /**
  * @brief Gera um arquivo de saída da árvore geradora mínima induzida pelo algoritmo de Dijkstra.
  * Essa implementação usa um vetor de distâncias para indução dos caminhos a percorrer.
  * 
- * @param G Grafo em questão;
- * @param v Vértice inicial.
+ * @warning Garanta que o retorno da função seja armazenado e desalocado devicamente com a função free()
+ * da biblioteca padrão <stdlib.h>.
  * 
- * @retval 1 - Arquivo de saída gerado com sucesso;
- * @retval 0 - Erro na geração do arquivo de saída.
+ * @param G Grafo em questão;
+ * @param v Vértice inicial;
+ * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
+ * (DEIXE NULO PARA NÃO GERAR O ARQUIVO DE SAÍDA)
+ * 
+ * @retval double[] - Vetor alocado dinâmicamente das distâncias entre os vértices;
+ * @retval NULL - Erro na geração do arquivo de saída ou alocação de estruturas.
  */
-int mwg_dijkstraVet(MW_Graph G, vertex v, char *path);
+double* mwg_dijkstraVet(MW_Graph G, vertex v, char *path);
 
 /**
  * @brief Gera um arquivo de saída da árvore geradora mínima induzida pelo algoritmo de Dijkstra.
  * Essa implementação usa uma árvore mín heap de distâncias para indução dos caminhos a percorrer.
  * 
+ * @warning Garanta que o retorno da função seja armazenado e desalocado devicamente com a função free()
+ * da biblioteca padrão <stdlib.h>.
+ * 
  * @param G Grafo em questão;
- * @param v Vértice inicial.
+ * @param v Vértice inicial;
+ * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
+ * (DEIXE NULO PARA NÃO GERAR O ARQUIVO DE SAÍDA)
  * 
  * @retval 1 - Arquivo de saída gerado com sucesso;
  * @retval 0 - Erro na geração do arquivo de saída.
  */
-int mwg_dijkstraHeap(MW_Graph G, vertex v, char *path);
+double* mwg_dijkstraHeap(MW_Graph G, vertex v, char *path);
 
 //----------------------------------------------------------------------------------
 

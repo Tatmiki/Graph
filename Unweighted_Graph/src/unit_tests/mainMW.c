@@ -48,7 +48,7 @@ int main()
     mwg_dijkstraVet(G, 2, "./graphs/output/saidaDijksVET_MW.txt");
 
     //Distancia mínima e caminho mínimo entre dois vértices
-    mwg_distance(G, 1, 3, "./graphs/output/saidaDistance_MW.txt");
+    mwg_distanceHeapDjk(G, 1, 3, "./graphs/output/saidaDistance_MW.txt");
 
     //Desamocamento
     mwg_destroyGraph(&G);

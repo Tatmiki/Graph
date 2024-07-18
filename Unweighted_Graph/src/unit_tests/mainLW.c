@@ -47,7 +47,7 @@ int main()
     lwg_dijkstraVet(G, 2, "./graphs/output/saidaDijksVET_LW.txt");
 
     //Distancia mínima e caminho mínimo entre dois vértices
-    lwg_distance(G, 1, 3, "./graphs/output/saidaDistance_LW.txt");
+    lwg_distanceHeapDjk(G, 1, 3, "./graphs/output/saidaDistance_LW.txt");
 
     //Desalocamento
     lwg_destroyGraph(&G);

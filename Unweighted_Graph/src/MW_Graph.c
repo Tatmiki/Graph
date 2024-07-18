@@ -153,7 +153,7 @@ int mwg_insertEdge(MW_Graph G, vertex v, vertex u, float w)
     return 0;
 }
 
-int mwwg_removeEdge(MW_Graph G, vertex v, vertex u)
+int mwg_removeEdge(MW_Graph G, vertex v, vertex u)
 {
     v--; u--;
     if(G->adj[v][u] != 0)
@@ -195,12 +195,12 @@ void mwg_show(MW_Graph G)
     }
 }
 
-double mwg_distance(MW_Graph G, vertex u, vertex v)
+double mwg_distanceHeapDjk(MW_Graph G, vertex u, vertex v, char *path)
 {
     u--; v--; 
 
     if (!negativeEdgeVerification(G))
-        return -1;
+        return 0;
 
     int w, x;
     double shortest_distance;
@@ -255,24 +255,34 @@ double mwg_distance(MW_Graph G, vertex u, vertex v)
             }
         
     }
+
     double distance = vertexes[v].distance;
-    
-    
-    FILE *f = fopen("./graphs/output/Caminho.txt", "w");
-    if(!f)
-    {
-        free(vertexes);
+    if(distance == FLOAT_MAX)
         return 0;
-    } 
-    fprintf(f, "Start\n");
-    mwg_shortestPath(v, vertexes, f);
-    fprintf(f, "End\n");
-    fclose(f);
+    
+    if(path != NULL)
+    {
+        FILE *f = fopen(path, "w");
+        if(!f)
+        {
+            free(vertexes);
+            return 0;
+        } 
+        fprintf(f, "Start\n");
+        mwg_shortestPath(v, vertexes, f);
+        fprintf(f, "End\n");
+        fclose(f);
+    }
     free(vertexes);
     return distance;
 }
 
-int mwg_dijkstraVet(MW_Graph G, vertex v, char *path)
+double mwg_distanceVetDjk(MW_Graph G, vertex u, vertex v, char *path)
+{
+
+}
+
+double* mwg_dijkstraVet(MW_Graph G, vertex v, char *path)
 {
     v--; 
     int w, u, x;
@@ -335,27 +345,27 @@ int mwg_dijkstraVet(MW_Graph G, vertex v, char *path)
         }
     }
 
-    FILE *file = fopen(path, "w");
-    if (file == NULL) {
-        free(vertexes);
-        return 0;
-    }
+    if(path != NULL)
+    {
+        FILE *file = fopen(path, "w");
+        if (file == NULL) {
+            free(vertexes);
+            return 0;
+        }
 
-    fprintf(file, "--- Arvore geradora minima de %u---\n", v + 1);
-    for (w = 0; w < G->V; w++) {
-        fprintf(file, "%d ~> %d | dist: %.2f\n", v + 1, w + 1, vertexes[w].distance);
-        
+        fprintf(file, "--- Arvore geradora minima de %u---\n", v + 1);
+        for (w = 0; w < G->V; w++) {
+            fprintf(file, "%d ~> %d | dist: %.2f\n", v + 1, w + 1, vertexes[w].distance);
+            
+        }
+        fclose(file);
     }
-
-    fclose(file);
     free(vertexes);
 
     return 1;
-    
-
 }
 
-int mwg_dijkstraHeap(MW_Graph G, vertex v, char *path)
+double* mwg_dijkstraHeap(MW_Graph G, vertex v, char *path)
 {
     v--;
     Vertex_djk *vertexes = (Vertex_djk*) malloc(sizeof(Vertex_djk) * G->V);
@@ -390,20 +400,23 @@ int mwg_dijkstraHeap(MW_Graph G, vertex v, char *path)
             }
         }
     }
+    pq_destroyPQueue(&pq);
     
-    FILE *file = fopen(path, "w");
-    if (file == NULL) {
-        free(vertexes);
-        return 0;
-    }
+    if(path != NULL)
+    {
+        FILE *file = fopen(path, "w");
+        if (file == NULL) {
+            free(vertexes);
+            return 0;
+        }
 
-    fprintf(file, "--- Arvore geradora minima de %u---\n", v + 1);
-    for (w = 0; w < G->V; w++) {
-        fprintf(file, "%d ~> %d | dist: %.2f\n", v + 1, w + 1, vertexes[w].distance);
-        
+        fprintf(file, "--- Arvore geradora minima de %u---\n", v + 1);
+        for (w = 0; w < G->V; w++) {
+            fprintf(file, "%d ~> %d | dist: %.2f\n", v + 1, w + 1, vertexes[w].distance);
+            
+        }
+        fclose(file);
     }
-
-    fclose(file);
     free(vertexes);
 
     return 1;
