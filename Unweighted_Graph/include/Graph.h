@@ -768,7 +768,7 @@ int mwg_insertEdge(MW_Graph G, vertex v, vertex u, float w);
  * @retval 1 - Remoção bem-sucedida;
  * @retval 0 - Caso a aresta não exista ou algum parâmetro seja incoerente.
  */
-int mwwg_removeEdge(MW_Graph G, vertex v, vertex u);
+int mwg_removeEdge(MW_Graph G, vertex v, vertex u);
 
 /**
  * @brief matrix_weighted_graph: Verifica a existência de uma aresta entre os vértices v e u.
@@ -817,7 +817,7 @@ void mwg_show(MW_Graph G);
  * @retval double - Distância mínima para chegar de u a v;
  * @retval -1 - Não há caminho de u a v.
  */
-double mwg_distance(MW_Graph G, vertex u, vertex v);
+double mwg_distance(MW_Graph G, vertex u, vertex v, char *path);
 
 /**
  * @brief Gera um arquivo de saída da árvore geradora mínima induzida pelo algoritmo de Dijkstra.

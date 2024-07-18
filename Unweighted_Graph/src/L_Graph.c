@@ -489,6 +489,7 @@ int lg_distance(L_Graph G, vertex v, vertex u)
 
 int lg_vertexEccentricity(L_Graph G, vertex v)
 {
+    v--;
     Vertex_info *vertexes = (Vertex_info*) malloc(sizeof(Vertex_info) * G->V);
     vertex w = lg_bfs_distances(G, v, vertexes);
     vertex u;
@@ -507,7 +508,7 @@ int lg_absoluteDiameter(L_Graph G)
 {
     vertex w = 0;
     int diameter = 0;
-    int eccentricity = lg_vertexEccentricity(G,w);
+    int eccentricity = lg_vertexEccentricity(G,w+1);
     if(eccentricity == -1)
         return -1;
     diameter = eccentricity;
