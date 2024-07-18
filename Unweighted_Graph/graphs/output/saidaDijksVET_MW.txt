@@ -1,0 +1,7 @@
+--- Arvore geradora minima de 2---
+2 ~> 1 | dist: 5.00
+2 ~> 2 | dist: 0.00
+2 ~> 3 | dist: 4.00
+2 ~> 4 | dist: 9.00
+2 ~> 5 | dist: 7.00
+2 ~> 6 | dist: 6.00
