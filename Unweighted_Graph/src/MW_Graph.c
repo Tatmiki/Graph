@@ -78,8 +78,8 @@ static int negativeEdgeVerification(MW_Graph G)
     for(i = 0; i < G->V; i++)
         for(j = 0; j < G->V; j++)
             if(G->adj[i][j] < 0)
-                return 0;
-    return 1;
+                return 1;
+    return 0;
 }
 
 static void mwg_shortestPath(vertex v, Vertex_djk *vertexes, FILE *f)
@@ -197,10 +197,9 @@ void mwg_show(MW_Graph G)
 
 double mwg_distanceHeapDjk(MW_Graph G, vertex u, vertex v, char *path)
 {
-    u--; v--; 
-
-    if (!negativeEdgeVerification(G))
+    if (negativeEdgeVerification(G)) 
         return 0;
+    u--; v--;
 
     int w, x;
     double shortest_distance;
@@ -279,27 +278,20 @@ double mwg_distanceHeapDjk(MW_Graph G, vertex u, vertex v, char *path)
 
 double mwg_distanceVetDjk(MW_Graph G, vertex u, vertex v, char *path)
 {
-
+    if (negativeEdgeVerification(G)) 
+        return 0;
 }
 
 double* mwg_dijkstraVet(MW_Graph G, vertex v, char *path)
 {
+    if (negativeEdgeVerification(G)) 
+        return NULL;
     v--; 
     int w, u, x;
     double shortest_distance;
     Vertex_djk *vertexes = (Vertex_djk*) malloc(sizeof(Vertex_djk) * G->V);
     if (vertexes == NULL)
         return 0;
-
-    if (v < 0 || v >= G->V) {
-        free(vertexes);
-        return 0;
-    }
-
-    if (!negativeEdgeVerification(G)) {
-        free(vertexes);
-        return 0;
-    }
 
     for (w = 0; w < G->V; w++) {
         vertexes[w].visited = 'W';
@@ -345,6 +337,16 @@ double* mwg_dijkstraVet(MW_Graph G, vertex v, char *path)
         }
     }
 
+    // gerando vetor de distãncias de retorno
+    double *distances = (double*) malloc(sizeof(double) * G->V);
+    if(distances == NULL)
+    {
+        free(vertexes);
+        return NULL;
+    }
+    for(w = 0; w < G->V; w++)
+        distances[w] = vertexes[w].distance;
+
     if(path != NULL)
     {
         FILE *file = fopen(path, "w");
@@ -362,11 +364,13 @@ double* mwg_dijkstraVet(MW_Graph G, vertex v, char *path)
     }
     free(vertexes);
 
-    return 1;
+    return distances;
 }
 
 double* mwg_dijkstraHeap(MW_Graph G, vertex v, char *path)
 {
+    if (negativeEdgeVerification(G)) 
+        return NULL;
     v--;
     Vertex_djk *vertexes = (Vertex_djk*) malloc(sizeof(Vertex_djk) * G->V);
     vertex w;
@@ -402,22 +406,29 @@ double* mwg_dijkstraHeap(MW_Graph G, vertex v, char *path)
     }
     pq_destroyPQueue(&pq);
     
+    // gerando vetor de distãncias de retorno
+    double *distances = (double*) malloc(sizeof(double) * G->V);
+    if(distances == NULL)
+    {
+        free(vertexes);
+        return NULL;
+    }
+    for(w = 0; w < G->V; w++)
+        distances[w] = vertexes[w].distance;
+
     if(path != NULL)
     {
         FILE *file = fopen(path, "w");
-        if (file == NULL) {
+        if (file == NULL) 
+        {
             free(vertexes);
             return 0;
         }
-
         fprintf(file, "--- Arvore geradora minima de %u---\n", v + 1);
-        for (w = 0; w < G->V; w++) {
+        for (w = 0; w < G->V; w++)
             fprintf(file, "%d ~> %d | dist: %.2f\n", v + 1, w + 1, vertexes[w].distance);
-            
-        }
         fclose(file);
     }
     free(vertexes);
-
-    return 1;
+    return distances;
 }
