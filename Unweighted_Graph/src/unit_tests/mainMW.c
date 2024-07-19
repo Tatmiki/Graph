@@ -1,14 +1,15 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "../../include/Graph.h"
 
 int main()
 {
     //Montando grafo apartir de um arquivo
-    MW_Graph G = mwg_makeGraphFromFile("./graphs/grafo_testeWM.txt");
+    MW_Graph G = mwg_makeGraphFromFile("./graphs/grafo_W_1.txt");
     
 
     /*
-        Para criar o seu próprio grafo, utimize a função mwg_makeGraph(int V), sendo V a quantidade de vértices que pertencerão
+        Para criar o seu próprio grafo, utilize a função mwg_makeGraph(int V), sendo V a quantidade de vértices que pertencerão
         ao grafo. Assim, ao criar o seu grafo, utimize a função mg_insertEdge(G, v, u, w) para adicionar ao grafo G uma arestas 
         entre o vértice v e o vértice u e o seu peso w.
 
@@ -21,7 +22,7 @@ int main()
     */
    
     //Exibindo grafo ponderado
-    mwg_show(G);
+    //mwg_show(G);
 
     //Exibindo tamanho do grafo em MBs
     printf("\nTamanho do arquivo em MB: %lf\n", mwg_representationSize((long long)mwg_getNumOfVertexes(G))/1000000.);
@@ -44,11 +45,12 @@ int main()
     printf("Quant. vertices: %d\n",mwg_getNumOfVertexes(G));
 
     //Dijkstras
-    mwg_dijkstraHeap(G, 1, "./graphs/output/saidaDijksHEAP_MW.txt");
-    mwg_dijkstraVet(G, 2, "./graphs/output/saidaDijksVET_MW.txt");
+    free(mwg_dijkstraHeap(G, 1, "./graphs/output/saidaDijksHEAP_MW.txt"));
+    free(mwg_dijkstraVet(G, 1, "./graphs/output/saidaDijksVET_MW.txt"));
 
     //Distancia mínima e caminho mínimo entre dois vértices
-    mwg_distanceHeapDjk(G, 1, 3, "./graphs/output/saidaDistance_MW.txt");
+    mwg_distanceHeapDjk(G, 1, 3, "./graphs/output/saidaDistance_MWheap.txt");
+    mwg_distanceVetDjk(G, 1, 3, "./graphs/output/saidaDistance_MWvet.txt");
 
     //Desamocamento
     mwg_destroyGraph(&G);

@@ -211,7 +211,7 @@ double mwg_distanceHeapDjk(MW_Graph G, vertex u, vertex v, char *path)
     {
         vertexes[w].visited = 'W';
         vertexes[w].father = -1;
-        vertexes[w].distance = INT_MAX; 
+        vertexes[w].distance = FLOAT_MAX; 
     }
 
     vertexes[u].distance = 0.0;
@@ -219,7 +219,7 @@ double mwg_distanceHeapDjk(MW_Graph G, vertex u, vertex v, char *path)
     int all_visited = 0;
     while (!all_visited) 
     {
-        shortest_distance = INT_MAX;
+        shortest_distance = FLOAT_MAX;
         int u_index = -1;
 
         for (x = 0; x < G->V; x++) 
@@ -229,7 +229,7 @@ double mwg_distanceHeapDjk(MW_Graph G, vertex u, vertex v, char *path)
                 u_index = x;
             }
         
-        if (u_index == -1 || shortest_distance == INT_MAX)
+        if (u_index == -1 || shortest_distance == FLOAT_MAX)
             break;
 
         vertexes[u_index].visited = 'B';
@@ -280,6 +280,60 @@ double mwg_distanceVetDjk(MW_Graph G, vertex u, vertex v, char *path)
 {
     if (negativeEdgeVerification(G)) 
         return 0;
+    u--; v--;
+    Vertex_djk *vertexes = (Vertex_djk*) malloc(sizeof(Vertex_djk) * G->V);
+    vertex w;
+
+    for(w = 0; w < G->V; w++)
+    {
+        vertexes[w].distance = FLOAT_MAX;
+        vertexes[w].father = -1;
+        vertexes[w].visited = 'W';
+    }
+
+    vertexes[u].distance = 0.;
+    PriorityQueue pq = pq_initPQueue(G->V);
+    WeightedEdge pivot = {u, 0.};
+    pq_enqueue(pq, pivot);
+
+    while(!pq_isEmpty(pq))
+    {
+        pivot = pq_dequeue(pq);
+
+        for (int w = 0; w < G->V; w++)
+        {
+            if (G->adj[pivot.v][w] > 0)  
+            {
+                if (vertexes[w].distance > vertexes[pivot.v].distance + G->adj[pivot.v][w])
+                {
+                    vertexes[w].distance = vertexes[pivot.v].distance + G->adj[pivot.v][w];
+                    vertexes[w].father = pivot.v;
+                    pq_enqueue(pq, (WeightedEdge){w, vertexes[w].distance});
+                }
+            }
+        }
+    }
+    pq_destroyPQueue(&pq);
+
+    double distance = vertexes[v].distance;
+    if(distance == FLOAT_MAX)
+        return 0;
+    
+    if(path != NULL)
+    {
+        FILE *f = fopen(path, "w");
+        if(!f)
+        {
+            free(vertexes);
+            return 0;
+        } 
+        fprintf(f, "Start\n");
+        mwg_shortestPath(v, vertexes, f);
+        fprintf(f, "End\n");
+        fclose(f);
+    }
+    free(vertexes);
+    return distance;
 }
 
 double* mwg_dijkstraVet(MW_Graph G, vertex v, char *path)
@@ -296,14 +350,14 @@ double* mwg_dijkstraVet(MW_Graph G, vertex v, char *path)
     for (w = 0; w < G->V; w++) {
         vertexes[w].visited = 'W';
         vertexes[w].father = -1;
-        vertexes[w].distance = INT_MAX; 
+        vertexes[w].distance = FLOAT_MAX; 
     }
 
     vertexes[v].distance = 0.0;
 
     int all_visited = 0;
     while (!all_visited) {
-        shortest_distance = INT_MAX;
+        shortest_distance = FLOAT_MAX;
         u = -1;
 
         for (x = 0; x < G->V; x++) {
@@ -313,7 +367,7 @@ double* mwg_dijkstraVet(MW_Graph G, vertex v, char *path)
             }
         }
 
-        if (u == -1 || shortest_distance == INT_MAX)
+        if (u == -1 || shortest_distance == FLOAT_MAX)
             break;
 
         vertexes[u].visited = 'B';

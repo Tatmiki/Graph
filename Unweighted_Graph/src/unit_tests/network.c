@@ -20,22 +20,8 @@ typedef struct
     char name[50];
 } Searcher;
 
-vertex findVertex(char *name)
-{
-    FILE *f = fopen("./graphs/rede_colaboracao_vertices.txt", "r");
-    vertex searcherVertex;
-    char searcherName[50];
-    while(fscanf(f, "%d,%50[^\n]", &searcherVertex, searcherName) != EOF)
-    {
-        if(strcmp(searcherName, name) == 0)
-        {
-            fclose(f); 
-            return searcherVertex;
-        }
-    }
-    fclose(f);
-    return -1;
-}
+vertex findVertex(char *name);
+void readSearchersFromFile(Searcher searchers[], int quantity, char *path);
 
 int main()
 {
@@ -55,19 +41,53 @@ int main()
     searchers[5] = (Searcher) {findVertex("Daniel R. Figueiredo"), "Daniel R. Figueiredo"};
     printf("Concluido!\n\n");
 
+    // Calculando as distãncias mónimas e gerando um arquivon de caminhos mínimos
     double distance;
-     
-    for(int i = 1; i < 6; i++)
+    vertex w;
+    char path[30] = "./graphs/output/caminhoMin_X"; // X na pos 27
+    for(w = 1; w < lwg_getNumOfVertexes(G); w++)
     {
-        printf("aqui1\n");
-        distance = lwg_distanceHeapDjk(G, searchers[0].node, searchers[i].node, "./graphs/output/distanceName");
-        //distance = lwg_distanceVetDjk(G, searchers[0].node, searchers[i].node, "./graphs/output/distanceName");
-        //lwg_dijkstraVet(G, searchers[0].node, "./graphs/output/cade.txt");
-        printf("aqui2\n");
+        path[27] = '1' + w;
+        distance = lwg_distanceHeapDjk(G, searchers[0].node, searchers[w].node, path);
         if(distance != -1)
-            printf("~ A distância entre %s e %s é de %.2lf\n", searchers[0].name, searchers[i].name, distance);
+            printf("~ A distância de %s para %s eh de: %.2lf\n", searchers[0].name, searchers[w].name, distance);
         else
-            printf("~ Não há caminho entre %s e %s!\n", searchers[0].name, searchers[i].name);
+            printf("Nao ha caminho entre %s e %s!\n", searchers[0].name, searchers[w].name);
     }
+    
+    int searchersQuantity = lwg_getNumOfVertexes(G);
     lwg_destroyGraph(&G);
+
+    // Lendo todos os pesquisadores para iterar sobre os caminhos mínimos
+    Searcher *listOfSearchers = (Searcher*) malloc(sizeof(Searcher) * searchersQuantity);
+    readSearchersFromFile(searchers, searchersQuantity, "./graphs/rede_colaboracao_vertices.txt");
+
+    // Editando os arquivos de saída de caminhos mínimos para suportar os nomes
+
+    return 0;
+}
+
+vertex findVertex(char *name)
+{
+    FILE *f = fopen("./graphs/rede_colaboracao_vertices.txt", "r");
+    vertex searcherVertex;
+    char searcherName[50];
+    while(fscanf(f, "%d,%50[^\n]", &searcherVertex, searcherName) != EOF)
+    {
+        if(strcmp(searcherName, name) == 0)
+        {
+            fclose(f); 
+            return searcherVertex;
+        }
+    }
+    fclose(f);
+    return -1;
+}
+
+void readSearchersFromFile(Searcher searchers[], int quantity, char *path)
+{
+    FILE *f = fopen(path, "r");
+    int i = 0;
+    while(fscanf(f, "%d,%50[^\n]", &searchers[i].node, searchers[i].name) != EOF && i < quantity);
+    fclose(f);
 }

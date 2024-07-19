@@ -43,8 +43,8 @@ int main()
     printf("Quant. vertices: %d\n",lwg_getNumOfVertexes(G));
 
     //Dijkstras
-    lwg_dijkstraHeap(G, 1, "./graphs/output/saidaDijksHEAP_LW.txt");
-    lwg_dijkstraVet(G, 2, "./graphs/output/saidaDijksVET_LW.txt");
+    free(lwg_dijkstraHeap(G, 1, "./graphs/output/saidaDijksHEAP_LW.txt"));
+    free(lwg_dijkstraVet(G, 1, "./graphs/output/saidaDijksVET_LW.txt"));
 
     //Distancia mínima e caminho mínimo entre dois vértices
     lwg_distanceHeapDjk(G, 1, 3, "./graphs/output/saidaDistance_LW.txt");
