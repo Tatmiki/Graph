@@ -43,7 +43,8 @@ $(BIN)/%.o: $(SRC)/%.c
 	gcc $(FLAGS) -c $< -I $(INCLUDE) -o $@
 
 clear:
-	rm $(BIN)/* $(TESTS)/* $(LIB)/*
+	rm $(BIN)/*.o $(TESTS)/* $(LIB)/*.a
+	touch $(TESTS)/.gitkeep
 
 cls:
-	del /Q "$(BIN)\*" "$(TESTS)\*" "$(LIB)\*"
+	del /Q "$(BIN)\*.o" "$(TESTS)\*.exe" "$(LIB)\*.a"
