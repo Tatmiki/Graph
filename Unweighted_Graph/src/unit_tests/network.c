@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "../../include/Graph.h"
 
@@ -12,6 +13,9 @@
     seguintes pesquisadores da rede de colaboração: Alan M. Turing, J. B. Kruskal, Jon M.
     Kleinberg, Éva Tardos, Daniel R. Figueiredo. Utilize exatamente estes nomes (strings)
     para identificar os Índices dos vértices no grafo.
+
+    *Obs da solução: a saída desenvolvida nesse programa é específica ao problema abordado
+    e não geneŕica, logo evite fazer grandes alterações.
 */
 
 typedef struct
@@ -21,16 +25,19 @@ typedef struct
 } Searcher;
 
 vertex findVertex(char *name);
-void readSearchersFromFile(Searcher searchers[], int quantity, char *path);
+void readSearchersFromFile(Searcher *searchers, int quantity, char *path);
 
 int main()
 {
+    // Cria um grafo da rede de colaboração.
     LW_Graph G = lwg_makeGraphFromFile("./graphs/rede_colaboracao.txt");
 
-    printf("Tamanho da rede (num. de vértices): %d\n", lwg_getNumOfEdges(G));
+    // Exibe algumas informações básicas do grafo.
+    printf("Tamanho da rede (num. de vértices): %d\n", lwg_getNumOfVertexes(G));
     printf("Conexões totais (num. de arestas): %d\n", lwg_getNumOfEdges(G));
 
-    // Busca de Alan M. Turing
+    // Busca os respectivos de cada pesquisador do problema no arquivo de vértices.
+    // *Obs: optamos por não carregar o grafos e os nomes ao mesmo tempo em memória, por isso essa busca.
     printf("Inciando busca dos pontos dos pesquisadores...\n"); 
     Searcher searchers[6];
     searchers[0] = (Searcher) {findVertex("Edsger W. Dijkstra"), "Edsger W. Dijkstra"};
@@ -41,13 +48,13 @@ int main()
     searchers[5] = (Searcher) {findVertex("Daniel R. Figueiredo"), "Daniel R. Figueiredo"};
     printf("Concluido!\n\n");
 
-    // Calculando as distãncias mónimas e gerando um arquivon de caminhos mínimos
+    // Calculando as distãncias mónimas e gerando um arquivon de caminhos mínimos.
     double distance;
     vertex w;
     char path[30] = "./graphs/output/caminhoMin_X"; // X na pos 27
-    for(w = 1; w < lwg_getNumOfVertexes(G); w++)
+    for(w = 1; w < 6; w++)
     {
-        path[27] = '1' + w;
+        path[27] = '0' + w;
         distance = lwg_distanceHeapDjk(G, searchers[0].node, searchers[w].node, path);
         if(distance != -1)
             printf("~ A distância de %s para %s eh de: %.2lf\n", searchers[0].name, searchers[w].name, distance);
@@ -55,15 +62,57 @@ int main()
             printf("Nao ha caminho entre %s e %s!\n", searchers[0].name, searchers[w].name);
     }
     
+    // Salva a quantidade de vértices e libera o grafo que não será mais utilizado.
     int searchersQuantity = lwg_getNumOfVertexes(G);
     lwg_destroyGraph(&G);
 
-    // Lendo todos os pesquisadores para iterar sobre os caminhos mínimos
+    // Lendo todos os pesquisadores para reescrever o arquivo de arquivos mínimos com os nomes do vértices.
     Searcher *listOfSearchers = (Searcher*) malloc(sizeof(Searcher) * searchersQuantity);
-    readSearchersFromFile(searchers, searchersQuantity, "./graphs/rede_colaboracao_vertices.txt");
+    readSearchersFromFile(listOfSearchers, searchersQuantity, "./graphs/rede_colaboracao_vertices.txt");
+    
+    // Editando os arquivos de saída de caminhos mínimos para suportar os nomes dos vértices.
+    FILE *fin, *fout;
+    char output_path[30];
+    char line[15];
+    for(w = 1; w < 6; w++)
+    {
+        // nomeia o arquivo copia de saida
+        path[27] = 'X';
+        strcpy(output_path, path);
 
-    // Editando os arquivos de saída de caminhos mínimos para suportar os nomes
+        // abre o arquivo de caminhos mínimos gerado anteriormente
+        path[27] = '0' + w;
+        fin = fopen(path, "r");
 
+        // verifica se o arquivo do respectivo dijkstra foi realmente gerado
+        if(fin == NULL)
+            continue;
+        
+        fout = fopen(output_path, "w"); // cria um arquivo cópia para saída com os nomes 
+
+        fscanf(fin, "%[^\n]\n", line); // pula o START
+        fprintf(fout, "START\n"); // copia o START
+        while(1)
+        {
+            int i = fscanf(fin, "%[^\n]\n", line); // lê uma linha do arquivo de caminhos mínimos
+            if(line[0] == 'E') // se ela for o END, quebra esse loop
+                break;
+            line[i-2] = '\0'; // retira a vírgula do final
+            i = strtol(line, NULL, 10); // converte a string para o respectivo vértice numérico
+            fprintf(fout, "%d, %s\n", i, listOfSearchers[i-1].name); // copia o vértice e escreve o respectivo nome para o arquivo de saída
+        }
+        fprintf(fout, "END\n"); // copia o END
+
+        // fecha o arquivo de entrada e o de cópia
+        fclose(fin);
+        fclose(fout);
+
+        // exclui o arquivo de entrada e renomeia a cópia com o nome do anterior.
+        remove(path);
+        rename(output_path, path);
+    }
+
+    free(listOfSearchers);
     return 0;
 }
 
@@ -84,10 +133,10 @@ vertex findVertex(char *name)
     return -1;
 }
 
-void readSearchersFromFile(Searcher searchers[], int quantity, char *path)
+void readSearchersFromFile(Searcher *searchers, int quantity, char *path)
 {
     FILE *f = fopen(path, "r");
     int i = 0;
-    while(fscanf(f, "%d,%50[^\n]", &searchers[i].node, searchers[i].name) != EOF && i < quantity);
+    while(fscanf(f, "%d,%50[^\n]", &searchers[i].node, searchers[i].name) != EOF && i < quantity) i++;
     fclose(f);
 }
