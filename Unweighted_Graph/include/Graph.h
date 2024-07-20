@@ -6,10 +6,9 @@
  * 
  * @brief Biblioteca de grafos não ponderados.
  * 
- * @details Essa é um biblioteca livre de grafos não ponderados que implementa
- * as representações em matriz de adjacência e lista de adjacências, além
- * de implementar algoritmos de busca, distância e identificar componentes
- * conexos do grafo.
+ * @details Essa é um biblioteca livre de grafos não ponderados e ponderados que implementa
+ * as representações em matriz de adjacência e lista de adjacências, além de implementar 
+ * algoritmos de busca, distância e identificar componentes conexos do grafo.
  * 
  * @version 1.0
  * @date 2024-07-07
@@ -81,6 +80,9 @@ unsigned long long lg_representationSize(unsigned long long V, unsigned long lon
  * @brief list_graph: Cria um grafo a partir de um arquivo texto de adjacências, contendo 
  * em sua primeira linha o número de vértices e as seguintes as adjacências.
  *
+ * @warning Não deixe de armazenar o retorno da função e use a função lg_destroyGraph() ao término do uso do grafo alocado.
+ * @see lg_destroyGraph
+ * 
  * @param path Caminho para o arquivo texto (completo ou em relação ao ambiente de execução).
  * 
  * @retval L_Graph - Ponteiro para o grafo criado;
@@ -89,20 +91,21 @@ unsigned long long lg_representationSize(unsigned long long V, unsigned long lon
 L_Graph lg_makeGraphFromFile(char *path);
 
 /**
- * @brief list_graph: Cria um grafo de lista de adjacências.
+ * @brief list_graph: Cria um grafo não ponderado de lista de adjacências.
  * 
  * @warning Não deixe de armazenar o retorno da função e use a função lg_destroyGraph() ao término do uso do grafo alocado.
  * @see lg_destroyGraph
  * 
  * @param V Número de vértices iniciais do grafo.
  * 
- * @retval L_Graph - Pontereito para um grafo de lista de adjacências alocado;
+ * @retval L_Graph - Ponteiro para um grafo de lista de adjacências alocado;
  * @retval NULL - Ponteiro nulo caso haja erro na alocação.
  */
 L_Graph lg_makeGraph(int V);
 
 /**
- * @brief list_graph: Desaloca a memória alocada de um grafo de lista de adjacências e configura seu ponteiro para nulo.
+ * @brief list_graph: Desaloca a memória alocada de um grafo não ponderado de lista de adjacências e configura 
+ * seu ponteiro para nulo.
  * 
  * @warning Sempre use essa função após o término do uso do grafo alocado na função lg_makeGraph()!
  * @see lg_makeGraph
@@ -112,11 +115,12 @@ L_Graph lg_makeGraph(int V);
 void lg_destroyGraph(L_Graph *G);
 
 /**
- * @brief list_graph: Insere uma aresta no grafo G, ligando os vértices v e u. Não admite arestas múltiplas.
+ * @brief list_graph: Insere uma aresta no grafo não ponderado G, ligando os vértices v e u. 
+ * Não admite arestas múltiplas.
  * 
  * @param G Grafo em que a aresta será inserida;
- * @param v Vértice v de origem/entrada;
- * @param u Vértice u de origem/entrada.
+ * @param v Vértice v de origem/destino;
+ * @param u Vértice u de origem/destino.
  * 
  * @retval 1 - para inserção bem-sucedida;
  * @retval 0 - caso a aresta já exista ou algum parâmetro seja incoerente.
@@ -165,14 +169,14 @@ int lg_getNumOfVertexes(L_Graph G);
 int lg_getNumOfEdges(L_Graph G);
 
 /**
- * @brief list_graph: Exibe o grafo de lista de adjacências.
+ * @brief list_graph: Exibe o grafo não ponderado de lista de adjacências.
  * 
  * @param G Grafo a ser exibido 
  */
 void lg_show(L_Graph G);
 
 /**
- * @brief list_graph: Gera um arquivo de saída com informações sobre o grafo.
+ * @brief list_graph: Gera um arquivo de saída com informações sobre o grafo não ponderado.
  * 
  * @details As seguinte informações serão geradas: número de vértices, 
  * número de arestas, grau mínimo, grau máximo, grau médio, e mediana de grau.
@@ -186,9 +190,10 @@ void lg_show(L_Graph G);
 int lg_outputFile(L_Graph G, char *path);
 
 /**
- * @brief list_graph: Percorre o grafo usando a busca em largura e gera um arquivo de texto da árvore geradorada.
+ * @brief list_graph: Percorre o grafo não ponderado usando a busca em largura e gera um arquivo de texto da 
+ * árvore geradorada.
  * 
- * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (0).
+ * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (nível 0).
  * 
  * @param G Grafo a ser percorrido;
  * @param v Vértice inicial.
@@ -200,10 +205,10 @@ int lg_outputFile(L_Graph G, char *path);
 int lg_bfs(L_Graph G, vertex v, char *path);
 
 /**
- * @brief list_graph: Percorre o grafo usando a busca em profundidade resursiva e gera um arquivo 
+ * @brief list_graph: Percorre o grafo não ponderado usando a busca em profundidade resursiva e gera um arquivo 
  * de texto da árvore geradora.
  * 
- * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (0).
+ * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (nível 0).
  * 
  * @param G Grafo a ser percorrido;
  * @param v Vértice inicial;
@@ -218,7 +223,7 @@ int lg_recursiveDfs(L_Graph G, vertex v, char *path);
  * @brief list_graph: Percorre o grafo usando a busca em profundidade iterativa e gera um arquivo 
  * de texto da árvore geradora.
  * 
- * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (0).
+ * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (nível 0).
  * 
  * @param G Grafo a ser percorrido;
  * @param v Vértice inicial;
@@ -294,12 +299,14 @@ int lg_aprroximateDiameter(L_Graph G);
  * @details Serão extraídas informações do tamanho (em vértices) dos componentes e a lista de vértices
  * pertencentes a cada um dos componentes. A lista será feita em ordem decrescente (do maior ao menor).
  * 
- * @warning Essa estrutura deve ser desalocada pela função cc_destroyCComponents
+ * @warning Garanta o salvamento do retorno da função, a estrutura retornada deve ser desalocada pela 
+ * função cc_destroyCComponents.
  * @see cc_getNumOfCComponents, cc_listCComponent, cc_showCComponent, cc_destroyCComponents
  * 
  * @param G Grafo em questão.
  * 
  * @retval l_ConnectedComponents - Lista de componentes conectados e suas informações.
+ * @retval NULL - Erro na alocação da estrutura.
  */
 l_ConnectedComponents lg_connectedComponents(L_Graph G);
 
@@ -317,6 +324,9 @@ unsigned long long mg_representationSize(unsigned long long V);
 /**
  * @brief matrix_graph: Cria um grafo a partir de um arquivo texto de adjacências, contendo 
  * em sua primeira linha o número de vértices e as seguintes as adjacências.
+ * 
+* @warning Não deixe de armazenar o retorno da função e use a função mg_destroyGraph() ao término do uso do grafo alocado.
+ * @see mg_destroyGraph
  * 
  * @param path Caminho para o arquivo texto (completo ou em relação ao ambiente de execução).
  * 
@@ -339,7 +349,8 @@ M_Graph mg_makeGraphFromFile(char *path);
 M_Graph mg_makeGraph(int V);
 
 /**
- * @brief matrix_graph: Desaloca a memória alocada de um grafo de matriz de adjacências e configura seu ponteiro para nulo.
+ * @brief matrix_graph: Desaloca a memória alocada de um grafo não ponderado de matriz de adjacências 
+ * e configura seu ponteiro para nulo.
  * 
  * @warning Sempre use essa função após o término do uso do grafo alocado na função mg_makeGraph()!
  * @see mg_makeGraph
@@ -379,7 +390,7 @@ int mg_removeEdge(M_Graph G, vertex v, vertex u);
  * @param v Vértice de origem/destino;
  * @param u Vértice de origem/destino.
  * 
- * @retval 1 - existe uma aresta entre u e v; 
+ * @retval 1 - Existe uma aresta entre u e v; 
  * @retval 0 - NÃO existe uma aresta entre u e v.
  */
 int mg_getEdge(M_Graph G, vertex v, vertex u);
@@ -425,11 +436,11 @@ int mg_outputFile(M_Graph G, char *path);
 /**
  * @brief matrix_graph: Percorre o grafo usando a busca em largura e gera um arquivo de texto da árvore geradora.
  * 
- * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (0).
+ * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (nível 0).
  * 
  * @param G Grafo a ser percorrido;
  * @param v Vértice inicial;
- * @param path String indicando o caminho e nome do arquivo de texto de saída(ex: "./graphs/output/saida.txt").
+ * @param path String indicando o caminho e nome do arquivo de texto de saída (ex: "./graphs/output/saida.txt").
  * 
  * @retval 1 - Arquivo de saída gerado com sucesso;
  * @retval 0 - Erro na geração do arquivo de saída.
@@ -440,7 +451,7 @@ int mg_bfs(M_Graph G, vertex v, char *path);
  * @brief matrix_graph: Percorre o grafo usando a busca em profundidade recursiva e gera um arquivo 
  * de texto da árvore geradora.
  * 
- * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (0).
+ * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (nível 0).
  * 
  * @param G Grafo a ser percorrido;
  * @param v Vértice inicial;
@@ -455,7 +466,7 @@ int mg_recursiveDfs(M_Graph G, vertex v, char *path);
  * @brief matrix_graph: Percorre o grafo usando a busca em profundidade iterativa e gera um arquivo 
  * de texto da árvore geradora.
  * 
- * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (0).
+ * @details O arquivo texto contém os vértices e seus respectivos níveis na árvore a partir da raiz (nível 0).
  * 
  * @param G Grafo a ser percorrido;
  * @param v Vértice inicial;
@@ -512,6 +523,10 @@ int mg_absoluteDiameter(M_Graph G);
  * ou seja, o comprimento do maior caminho do grafo. Essa função retorna o diâmetro aproximado de um grafo 
  * conectado, porém com uma alta taxa de precisão. Sua complexidade é duas vezes O(V^2).
  * 
+ * @details O princípio é que selecionamos um vértice qualquer (a função escolhe o 1º) e executamos
+ * a BFS nele e descobrimos o vértice v mais distante, então executamos a BFS em v e descobrimos o
+ * vértice u mais distante, e nisso temos que a distância entre v e u é o diâmetro do grafo.
+ * 
  * @param G Grafo em questão.
  * 
  * @retval int - Diãmetro do grafo.
@@ -524,19 +539,21 @@ int mg_aprroximateDiameter(M_Graph G);
  * utlizar funções adicionais da biblioteca que retornam a quantidade de componentes conexos, listam os
  * os componentes em ordem decrescente e exibe os dados de um componente específico.
  * 
- * @warning Essa estrutura deve ser desalocada pela função cc_destroyCComponents
+ * @warning Garanta o salvamento do retorno da função, a estrutura retornada deve ser desalocada pela 
+ * função cc_destroyCComponents.
  * @see cc_getNumOfCComponents, cc_listCComponent, cc_showCComponent, cc_destroyCComponents
  * 
  * @param G Grafo em questão.
  * 
  * @retval l_ConnectedComponents - Lista de componentes conectados e suas informações.
+ * @retval NULL - Erro na alocação da estrutura.
  */
 l_ConnectedComponents mg_connectedComponents(M_Graph G);
 
 //----------------------------------------------------------------------------------
 
 /**
- * @brief list_wighted_graph: Retorna o tamanho em bytes da representação de um grafo ponderado de V vértices 
+ * @brief list_weighted_graph: Retorna o tamanho em bytes da representação de um grafo ponderado de V vértices 
  * e E arestas com lista de adjacências.
  * 
  * @param V Quantidade de vértices que seriam representados;
@@ -547,9 +564,12 @@ l_ConnectedComponents mg_connectedComponents(M_Graph G);
 unsigned long long lwg_representationSize(unsigned long long V, unsigned long long E);
 
 /**
- * @brief list_wighted_graph: Cria um grafo ponderado a partir de um arquivo texto de adjacências, contendo 
+ * @brief list_weighted_graph: Cria um grafo ponderado a partir de um arquivo texto de adjacências, contendo 
  * em sua primeira linha o número de vértices e as seguintes as adjacências com os pesos.
  *
+ * @warning Não deixe de armazenar o retorno da função e use a função lg_destroyGraph() ao término do uso do grafo alocado.
+ * @see lwg_destroyGraph
+ * 
  * @param path Caminho para o arquivo texto (completo ou em relação ao ambiente de execução).
  * 
  * @retval LW_Graph - Ponteiro para o grafo criado;
@@ -558,20 +578,20 @@ unsigned long long lwg_representationSize(unsigned long long V, unsigned long lo
 LW_Graph lwg_makeGraphFromFile(char *path);
 
 /**
- * @brief list_wighted_graph: Cria um grafo ponderado de lista de adjacências.
+ * @brief list_weighted_graph: Cria um grafo ponderado de lista de adjacências.
  * 
  * @warning Não deixe de armazenar o retorno da função e use a função lg_destroyGraph() ao término do uso do grafo alocado.
  * @see lwg_destroyGraph
  * 
  * @param V Número de vértices iniciais do grafo.
  * 
- * @retval LW_Graph - Pontereito para um grafo de lista de adjacências alocado;
+ * @retval LW_Graph - Ponteiro para um grafo de lista de adjacências alocado;
  * @retval NULL - Ponteiro nulo caso haja erro na alocação.
  */
 LW_Graph lwg_makeGraph(int V);
 
 /**
- * @brief list_wighted_graph: Desaloca a memória alocada de um grafo de lista de adjacências e configura seu ponteiro para nulo.
+ * @brief list_weighted_graph: Desaloca a memória alocada de um grafo de lista de adjacências e configura seu ponteiro para nulo.
  * 
  * @warning Sempre use essa função após o término do uso do grafo alocado na função lwg_makeGraph()!
  * @see lwg_makeGraph
@@ -581,7 +601,7 @@ LW_Graph lwg_makeGraph(int V);
 void lwg_destroyGraph(LW_Graph *G);
 
 /**
- * @brief list_wighted_graph: Insere uma aresta no grafo G, ligando os vértices v e u e atribuindo um peso a essa aresta.
+ * @brief list_weighted_graph: Insere uma aresta no grafo G, ligando os vértices v e u e atribuindo um peso a essa aresta.
  * Não é admitido arestas múltiplas.
  * 
  * @param G Grafo em que a aresta será inserida;
@@ -595,7 +615,7 @@ void lwg_destroyGraph(LW_Graph *G);
 int lwg_insertEdge(LW_Graph G, vertex v, vertex u, double w);
 
 /**
- * @brief list_wighted_graph: Remove uma aresta do grafo G entre os vértices v e u.
+ * @brief list_weighted_graph: Remove uma aresta do grafo G entre os vértices v e u.
  * 
  * @param G Grafo em questão.
  * @param v Vértice v de origem/destino;
@@ -607,7 +627,7 @@ int lwg_insertEdge(LW_Graph G, vertex v, vertex u, double w);
 int lwg_removeEdge(LW_Graph G, vertex v, vertex u);
 
 /**
- * @brief list_wighted_graph: Verifica a existência de uma aresta entre os vértices v e u.
+ * @brief list_weighted_graph: Verifica a existência de uma aresta entre os vértices v e u.
  * 
  * @param G Grafo a ser considerado;
  * @param v Vértice v de origem/destino;
@@ -619,7 +639,7 @@ int lwg_removeEdge(LW_Graph G, vertex v, vertex u);
 double lwg_getEdge(LW_Graph G, vertex v, vertex u);
 
 /**
- * @brief list_wighted_graph: Retorna o número de vértices do grafo.
+ * @brief list_weighted_graph: Retorna o número de vértices do grafo.
  * 
  * @param G Grafo em questão.
  * 
@@ -628,7 +648,7 @@ double lwg_getEdge(LW_Graph G, vertex v, vertex u);
 int lwg_getNumOfVertexes(LW_Graph G);
 
 /**
- * @brief list_wighted_graph: Retorna o número de arestas do grafo.
+ * @brief list_weighted_graph: Retorna o número de arestas do grafo.
  * 
  * @param G Grafo em questão.
  * @return int - Número de arestas do grafo.
@@ -636,14 +656,14 @@ int lwg_getNumOfVertexes(LW_Graph G);
 int lwg_getNumOfEdges(LW_Graph G);
 
 /**
- * @brief list_wighted_graph: Exibe o grafo de lista de adjacências.
+ * @brief list_weighted_graph: Exibe o grafo de lista de adjacências.
  * 
  * @param G Grafo a ser exibido 
  */
 void lwg_show(LW_Graph G);
 
 /**
- * @brief Calcula a distãncia entre dois vértices e gera um arquivo contendo o caminho
+ * @brief list_weighted_graph: Calcula a distãncia entre dois vértices e gera um arquivo contendo o caminho
  * entre vértices de u a v. Implementação com Dijkstra usando heap de distâncias.
  * 
  * @param G Grafo em questão;
@@ -658,7 +678,7 @@ void lwg_show(LW_Graph G);
 double lwg_distanceHeapDjk(LW_Graph G, vertex u, vertex v, char *path);
 
 /**
- * @brief Calcula a distãncia entre dois vértices e gera um arquivo contendo o caminho
+ * @brief list_weighted_graph: Calcula a distãncia entre dois vértices e gera um arquivo contendo o caminho
  * entre vértices de u a v. Implementação com Dijkstra usando vetor de distâncias.
  * 
  * @param G Grafo em questão;
@@ -673,7 +693,7 @@ double lwg_distanceHeapDjk(LW_Graph G, vertex u, vertex v, char *path);
 double lwg_distanceVetDjk(LW_Graph G, vertex u, vertex v, char *path);
 
 /**
- * @brief Gera um arquivo de saída da árvore geradora mínima induzida pelo algoritmo de Dijkstra.
+ * @brief list_weighted_graph: Gera um arquivo de saída da árvore geradora mínima induzida pelo algoritmo de Dijkstra.
  * Essa implementação usa um vetor de distâncias para indução dos caminhos a percorrer.
  * 
  * @warning Garanta que o retorno da função seja armazenado e desalocado devicamente com a função free()
@@ -690,7 +710,7 @@ double lwg_distanceVetDjk(LW_Graph G, vertex u, vertex v, char *path);
 double* lwg_dijkstraVet(LW_Graph G, vertex v, char *path);
 
 /**
- * @brief Gera um arquivo de saída da árvore geradora mínima induzida pelo algoritmo de Dijkstra.
+ * @brief list_weighted_graph: Gera um arquivo de saída da árvore geradora mínima induzida pelo algoritmo de Dijkstra.
  * Essa implementação usa uma árvore mín heap de distâncias para indução dos caminhos a percorrer.
  * 
  * @warning Garanta que o retorno da função seja armazenado e desalocado devicamente com a função free()
@@ -721,6 +741,9 @@ unsigned long long mwg_representationSize(unsigned long long V);
 /**
  * @brief matrix_weighted_graph: Cria um grafo ponderado a partir de um arquivo texto de adjacências, 
  * contendo em sua primeira linha o número de vértices e as seguintes as adjacências com os pesos.
+ * 
+ * @warning Não deixe de armazenar o retorno da função e use a função mwg_destroyGraph() ao término do uso do grafo alocado.
+ * @see mwg_destroyGraph
  * 
  * @param path Caminho para o arquivo texto (completo ou em relação ao ambiente de execução).
  * 
@@ -754,7 +777,7 @@ MW_Graph mwg_makeGraph(int V);
 void mwg_destroyGraph(MW_Graph *G);
 
 /**
- * @brief matrix_graph: Insere uma aresta no grafo G, ligando os vértices v e u. Não admite arestas múltiplas.
+ * @brief matrix_weighted_graph: Insere uma aresta no grafo ponderado G, ligando os vértices v e u. Não admite arestas múltiplas.
  * 
  * @param G Grafo em que será inserido a aresta;
  * @param v Vértice v de origem/destino;
@@ -815,7 +838,7 @@ int mwg_getNumOfEdges(MW_Graph G);
 void mwg_show(MW_Graph G);
 
 /**
- * @brief Calcula a distãncia entre dois vértices e gera um arquivo contendo o caminho
+ * @brief matrix_weighted_graph: Calcula a distãncia entre dois vértices e gera um arquivo contendo o caminho
  * entre vértices de u a v. Utiliza fila de prioridade para as distâncias.
  * 
  * @param G Grafo em questão;
@@ -829,7 +852,7 @@ void mwg_show(MW_Graph G);
 double mwg_distanceHeapDjk(MW_Graph G, vertex u, vertex v, char *path);
 
 /**
- * @brief Calcula a distãncia entre dois vértices e gera um arquivo contendo o caminho
+ * @brief matrix_weighted_graph: Calcula a distãncia entre dois vértices e gera um arquivo contendo o caminho
  * entre vértices de u a v. Utiliza um vetor e busca sequencial para as distâncias.
  * 
  * @param G Grafo em questão;
@@ -843,7 +866,7 @@ double mwg_distanceHeapDjk(MW_Graph G, vertex u, vertex v, char *path);
 double mwg_distanceVetDjk(MW_Graph G, vertex u, vertex v, char *path);
 
 /**
- * @brief Gera um arquivo de saída da árvore geradora mínima induzida pelo algoritmo de Dijkstra.
+ * @brief matrix_weighted_graph: Gera um arquivo de saída da árvore geradora mínima induzida pelo algoritmo de Dijkstra.
  * Essa implementação usa um vetor de distâncias para indução dos caminhos a percorrer.
  * 
  * @warning Garanta que o retorno da função seja armazenado e desalocado devicamente com a função free()
@@ -879,7 +902,7 @@ double* mwg_dijkstraHeap(MW_Graph G, vertex v, char *path);
 //----------------------------------------------------------------------------------
 
 /**
- * @brief Retorna o número de componentes conexos extraídos de um grafo.
+ * @brief cc_components: Retorna o número de componentes conexos extraídos de um grafo.
  * 
  * @param l Lista de componentes conexos anteriormente extraída.
  * 
@@ -888,14 +911,14 @@ double* mwg_dijkstraHeap(MW_Graph G, vertex v, char *path);
 int cc_getNumOfCComponents(l_ConnectedComponents l);
 
 /**
- * @brief Lista os componentes e seus tamanhos de forma crescente de uma lista de componentes conexos.
+ * @brief cc_components: Lista os componentes e seus tamanhos de forma crescente de uma lista de componentes conexos.
  * 
  * @param l Lista de componentes conexos anteriormente extraída.
  */
 void cc_listCComponents(l_ConnectedComponents l);
 
 /**
- * @brief Exibe as informações de tamanho e exibe os vértices pertencentes a um componente conexo.
+ * @brief cc_components: Exibe as informações de tamanho e exibe os vértices pertencentes a um componente conexo.
  * 
  * @param l Lista de componentes conexos anteriormente extraída.
  * @param id Identificador do componente em questão. O identificador pode ser encontrado na função mg_listCComponents.
@@ -903,7 +926,7 @@ void cc_listCComponents(l_ConnectedComponents l);
 void cc_showCComponent(l_ConnectedComponents l, int id);
 
 /**
- * @brief Exibe o tamanho, em vértices, de um componente conectado pertecente a uma lista de componentes.
+ * @brief cc_components: Exibe o tamanho, em vértices, de um componente conectado pertecente a uma lista de componentes.
  * 
  * @param l Lista de componentes conexos anteriormente extraída.
  * @param id Identificador do componente em questão. O identificador pode ser encontrado na função mg_listCComponents.
@@ -913,7 +936,7 @@ void cc_showCComponent(l_ConnectedComponents l, int id);
 int cc_getSizeCComponent(l_ConnectedComponents l, int id);
 
 /**
- * @brief Desaloca a memória de uma lista de componentes conexos e configura seu ponteiro para nulo.
+ * @brief cc_components: Desaloca a memória de uma lista de componentes conexos e configura seu ponteiro para nulo.
  * 
  * @warning Sempre use essa função após o término do uso do grafo alocado 
  * na função mg_connectedComponents() ou lg_connectedComponents!

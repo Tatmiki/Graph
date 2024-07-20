@@ -5,7 +5,7 @@ LIB = ./lib
 LIB_NAMES = -lGraph
 SRC = ./src
 TESTS_SRC = $(SRC)/unit_tests
-FLAGS = -flto -O3 -Wall -Wextra
+FLAGS = -std=c99 -flto -O3 -Wall -Wextra
 
 # Obter todos os arquivos de teste
 UNIT_TESTS = $(wildcard $(TESTS_SRC)/*.c)

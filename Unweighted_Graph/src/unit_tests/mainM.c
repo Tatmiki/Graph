@@ -6,7 +6,11 @@ int main()
     int id;
     //Montando grafo apartir de um arquivo
     M_Graph G = mg_makeGraphFromFile("./graphs/grafo_testeL.txt"); //Adicione aqui o endereço do arquivo 
-
+    if(G == NULL)
+    {
+        printf("Arquivo do grafo não foi encontrado!\n");
+        return 0;
+    }
     /*
         Para criar o seu próprio grafo, utilize a função mg_makeGraph(int V), sendo V a quantidade de vértices que pertencerão
         ao grafo. Assim, ao criar o seu grafo, utilize a função mg_insertEdge(G, v, w) para adicionar ao grafo G uma arestas 

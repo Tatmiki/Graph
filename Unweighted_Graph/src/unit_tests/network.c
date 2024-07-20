@@ -31,6 +31,11 @@ int main()
 {
     // Cria um grafo da rede de colaboração.
     LW_Graph G = lwg_makeGraphFromFile("./graphs/rede_colaboracao.txt");
+    if(G == NULL)
+    {
+        printf("Arquivo do grafo não foi encontrado!\n");
+        return 0;
+    }
 
     // Exibe algumas informações básicas do grafo.
     printf("Tamanho da rede (num. de vértices): %d\n", lwg_getNumOfVertexes(G));
@@ -111,8 +116,9 @@ int main()
         remove(path);
         rename(output_path, path);
     }
-
     free(listOfSearchers);
+    
+    printf("\n~ Arquivo de saída de caminhos mínimos gerados na pasta graphs/output.\n");
     return 0;
 }
 

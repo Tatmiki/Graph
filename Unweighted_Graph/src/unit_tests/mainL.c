@@ -6,7 +6,11 @@ int main()
     int id;
     //Montando grafo apartir de um arquivo
     L_Graph G = lg_makeGraphFromFile("./graphs/grafo_testeL.txt"); //Adicione aqui o endereço do arquivo 
-
+    if(G == NULL)
+    {
+        printf("Arquivo do grafo não foi encontrado!\n");
+        return 0;
+    }
     /*
         Para criar o seu próprio grafo, utilize a função lg_makeGraph(int V), sendo V a quantidade de vértices que pertencerão
         ao grafo. Assim, ao criar o seu grafo, utilize a função lg_insertEdge(G, v, w) para adicionar ao grafo G uma arestas 
@@ -31,7 +35,7 @@ int main()
     printf("Quant. vertices: %d\n",lg_getNumOfVertexes(G));
 
     //Criar arquivo vom informações sobre o grafo 
-     lg_outputFile(G, "./graphs/output/meuGrafo_L.txt"); 
+    lg_outputFile(G, "./graphs/output/meuGrafo_L.txt"); 
 
     //verificação da existência de uma aresta utilizando inserção e remoção
     if(!lg_getEdge(G, 1, 4))
